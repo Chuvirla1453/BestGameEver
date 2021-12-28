@@ -1,11 +1,188 @@
 import pygame as pg
 from sys import exit
+from proc_gen import *
+from AI import *
 
 
 start_win_size = (start_win_width, start_win_height) = (600, 400)
 
 start_win_btn_size = (start_win_btn_width, start_win_btn_height) = (140, 70)
 start_win_btns_count = 3
+
+class GameField:
+    """
+    Класс с основной игровой логикой, ходами, картой с врагами и.т.д.
+    """
+    def __init__(self, level):
+        self.map = proc_gen(level)
+        width, height = 1488, 420 # Потом переделаем
+        self.camera = Camera(self.map.hero, self.map, width, height)
+        self.turns = self.map.turns
+        self.turn = 0
+
+    def render(self): # Тут проигрываем все анимации и обновляем камеру
+        self.camera.update()
+
+    def check_activity(self): # Тут обновляем значения
+        pass
+
+    def turn_system(self):
+        if self.turn == 0:
+            pass # Выбирает игрок свой ход
+        else:
+            calculate_turn(self.map.get_character(self.turn))
+
+        self.check_activity()
+
+    def search_tile(self, x, y):
+        return self.map.cells[y][x]
+
+
+class Tile:
+    """
+    Класс с основными значениями тайлов
+    """
+    def __init__(self, x, y, type_of_cell): # x и y здесь - это на карте
+        self.x = x
+        self.y = y
+        self.type_of_cell = type_of_cell
+        self.collision = False
+        self.enemy_collision = False
+        self.end = False
+        self.tile_inventory = []
+        if self.type_of_cell == 'wall':
+            self.collision = True
+            self.sprite = 'wall.png'
+        elif self.type_of_cell == 'door':
+            self.enemy_collision = True
+            self.sprite = 'door.png'
+        elif self.type_of_cell == 'ladder':
+            self.end = True
+            self.sprite = 'ladder.png'
+        else:
+            self.sprite = 'floor.png'
+
+    def render_lying_odject(self):
+        pass
+        # if self.tile_inventory[-1] == ...  Здесь будем смотреть спрайт для последнего
+        # лежащего предмета и рендерить его
+
+    def add_item(self, item):
+        self.tile_inventory.append(item)
+
+
+class Camera: # x и y здесь - это на окне pygame
+    """
+    Класс с камерой, которая будет центрироваться на персноже
+    """
+    def __init__(self, target, map):
+        self.target = target
+        self.map = map
+        self.x = target.x
+        self.y = target.y
+
+    def update(self):
+        self.x = self.target.x
+        self.y += self.target.y
+
+
+class BaseCharacter:
+    """
+    Класс для основ всего 'живого'
+    """
+    def __init__(self, x, y, hp, name):  # x и y здесь - это на готовой карте из тайлов
+        self.name = name
+        self.x = x
+        self.y = y
+        self.hp = hp
+
+    def move(self, dx, dy):
+        self.x += dx
+        self.y += dy
+
+    def is_alive(self):
+        if self.hp > 0:
+            return True
+        return False
+
+    def get_damage(self, hit):
+        if self.is_alive():
+            self.hp -= hit
+
+    def get_coords(self):
+        return self.x, self.y
+
+
+class Hero(BaseCharacter):
+    """
+    Класс ГГ
+    """
+    def __init__(self, x, y, hp, name, weapon, armor, gamefield):
+        super.__init__(x, y, hp, name)
+        self.gamefield = gamefield
+        self.weapon = weapon
+        self.armor = armor
+        self.inventory = [weapon, armor, []]
+
+    def hit(self, target):
+        target.get_damage(self.weapon.damage)
+
+    def change_weapon(self, new_weapon):
+        if len(self.inventory[2]) < 6: # Потом возможно поменяем вместимость
+            self.inventory[2].append(self.weapon)
+            self.weapon = new_weapon
+            self.inventory[0] = new_weapon
+        else:
+            self.gamefield.search_tile(self.x, self.y).add_item(self.weapon)
+            self.weapon = new_weapon
+            self.inventory[0] = new_weapon
+
+    def do_move(self, new_x, new_y):
+        self.move(new_x - self.x, new_y - self.y) # Возможно потом прикрутим сюда A* для быстрых ходов
+
+
+class BaseEnemy(BaseCharacter):
+    """
+    Здесь все враги
+    """
+    def __init__(self, x, y, hp, name, gamefield):
+        super.__init__(x, y, hp, name)
+        self.gamefield = gamefield
+        if name == 'Rat':
+            self.drop = None
+            self.chance_of_drop = None
+            self.damage = None
+            pass
+        elif name == "Skeleton":
+            self.drop = None
+            self.chance_of_drop = None
+            self.damage = None
+
+    def hit(self, target):
+        target.get_damage(self.damage)
+
+    def do_move(self, new_x, new_y):
+        self.move(new_x - self.x, new_y - self.y)
+
+
+class Weapon:
+    """
+    Класс со значениями оружия
+    """
+    def __init__(self, damage, sprite, name):
+        self.damage = damage
+        self.sprite = sprite
+        self.name = name
+
+
+class Armor:
+    """
+    Класс со значениями брони
+    """
+    def __init__(self, armor, sprite, name):
+        self.armor = armor
+        self.sprite = sprite
+        self.name = name
 
 
 class Button(pg.sprite.Sprite):
