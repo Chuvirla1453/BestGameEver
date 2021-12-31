@@ -1,6 +1,6 @@
 import pygame as pg
 from sys import exit
-from proc_gen import *
+from proc_gen import proc_gen
 from AI import *
 
 
@@ -8,6 +8,7 @@ start_win_size = (start_win_width, start_win_height) = (600, 400)
 
 start_win_btn_size = (start_win_btn_width, start_win_btn_height) = (140, 70)
 start_win_btns_count = 3
+
 
 class GameField:
     """
@@ -20,15 +21,15 @@ class GameField:
         self.turns = self.map.turns
         self.turn = 0
 
-    def render(self): # Тут проигрываем все анимации и обновляем камеру
+    def render(self):  # Тут проигрываем все анимации и обновляем камеру
         self.camera.update()
 
-    def check_activity(self): # Тут обновляем значения
+    def check_activity(self):  # Тут обновляем значения
         pass
 
     def turn_system(self):
         if self.turn == 0:
-            pass # Выбирает игрок свой ход
+            pass  # Выбирает игрок свой ход
         else:
             calculate_turn(self.map.get_character(self.turn))
 
