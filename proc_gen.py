@@ -11,8 +11,8 @@ class Map:
         self.enemy_count = 5 * level + random.randint(-1, 3 * level)
         self.room_count = 3 * level + random.randint(-1, 2 * level)
         self.room_count = 1
-        self.width = int(self.room_count ** 0.5 * 7)
-        self.height = int(self.room_count ** 0.5 * 7)
+        self.width = int(self.room_count ** 0.5 * 20)
+        self.height = int(self.room_count ** 0.5 * 20)
         self.my_map = []
         self.rooms = []
         for _ in range(self.height):
@@ -24,8 +24,8 @@ class Map:
 
     def create_room(self):
         blocks_count = random.randint(30, 50)
-        y0 = random.randint(0, self.height - 1)
-        x0 = random.randint(0, self.width - 1)
+        y0 = random.randint(blocks_count // 3, self.height - blocks_count // 3)
+        x0 = random.randint(blocks_count // 3, self.height - blocks_count // 3)
         queue = [(y0, x0)]
         room_blocks = []
         self.test_my_map = [['.'] * self.width for _ in range(self.height)]
