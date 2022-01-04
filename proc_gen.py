@@ -1,4 +1,5 @@
 import random
+from main import *
 
 
 def proc_gen(level):
@@ -133,9 +134,10 @@ class Map:
                     self.my_map[i][j] = self.test_my_map[i][j]
 
 
-t = proc_gen(1).my_map
-for i in t:
-    print(*i)
+if __name__ == '__main__':
+    t = proc_gen(1).my_map
+    for i in t:
+        print(*i)
 
 
 
