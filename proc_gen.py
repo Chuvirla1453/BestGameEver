@@ -10,8 +10,8 @@ class Map:
         self.enemy_count = 5 * level + random.randint(-1, 3 * level)
         self.room_count = 3 * level + random.randint(-1, 2 * level)
         self.room_count = 1
-        self.width = int(self.room_count ** 0.5 * 7)
-        self.height = int(self.room_count ** 0.5 * 7)
+        self.width = int(self.room_count ** 0.5 * 15)
+        self.height = int(self.room_count ** 0.5 * 15)
         self.my_map = []
         self.rooms = []
         for _ in range(self.height):
@@ -28,6 +28,7 @@ class Map:
         queue = [(y0, x0)]
         room_blocks = []
         self.test_my_map = [['.'] * self.width for _ in range(self.height)]
+
         while blocks_count > 0:
             try:
                 p = random.randint(0, len(queue) - 1)
@@ -133,9 +134,7 @@ class Map:
                     self.my_map[i][j] = self.test_my_map[i][j]
 
 
-t = proc_gen(1).my_map
-for i in t:
-    print(*i)
-
+for i in proc_gen(1).my_map:
+    print(i)
 
 
