@@ -16,6 +16,7 @@ start_win_btns_count = 3
 screen_size = (screen_width, screen_height) = (Tk().winfo_screenwidth(), Tk().winfo_screenheight())
 
 tile_size = (tile_width, tile_height) = (64, 64)
+tiles_sprites = pg.sprite.Group()
 
 
 def load_image(*path):
@@ -33,12 +34,20 @@ class Tile(pg.sprite.Sprite):
     Класс с основными значениями тайлов
     """
 
-    def __init__(self, x: int, y: int, image: pg.Surface):  # x и y здесь - это на карте
+    def __init__(self, x: int, y: int, image: str):  # x и y здесь - это на карте
+        global tiles_sprites
         super(Tile, self).__init__()
+        self.x, self.y = x, y
+        self.si = image
+        self.inventory = []
+        self.character = None
 
-        self.image = image
+        if image == 'wall':  # Я как обычно какую-то херню тут пишу, потом поправь, но типа так должно быть
+            self.image = load_image('Sprites', 'Wall', f'{randint(1, 4)}.png')
+        elif image == "floor":
+            load_image('Sprites', 'Floor', f'{randint(1, 5)}.png')
         self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
-
+        tiles_sprites.add(self)
         self.cell = (x, y)
 
     def render_lying_object(self):
@@ -48,6 +57,27 @@ class Tile(pg.sprite.Sprite):
         """
         pass
 
+    def add_items(self, item):
+        self.inventory.append(item)
+
+    def add_character(self, character):
+        self.character = character
+
+    def has_item(self):
+        return bool(len(self.inventory))
+
+    def has_character(self):
+        return bool(self.character)
+
+    def get_pos(self):
+        return self.x, self.y
+
+    def __str__(self):
+        if self.si == 'wall':
+            return '#'
+        if self.si == 'floor':
+            return '_'
+
 
 class BaseCharacter(pg.sprite.Sprite):
     """
@@ -55,7 +85,7 @@ class BaseCharacter(pg.sprite.Sprite):
 
     """
 
-    def __init__(self, x: int, y: int, image: str, hp: int, name: str):
+    def __init__(self, x: int, y: int, image: pg.Surface, hp: int, name: str):
         """
         :params x, y: координата клетки к примеру (0, 1); (5, 4)
         :param image: путь к картинке
@@ -89,7 +119,8 @@ class BaseCharacter(pg.sprite.Sprite):
         Ранение персонажа
         """
         if self.is_alive():
-            self.hp -= damage
+            if damage > 0:
+                self.hp -= damage
 
     def get_cell(self) -> (int, int):
         """
@@ -123,14 +154,14 @@ class MainCharacter(BaseCharacter):
     Класс ГГ
     """
 
-    def __init__(self, x: int, y: int, image: str, hp: int, name: str, weapon, armor, game_field):
+    def __init__(self, x: int, y: int, hp: int, name: str, weapon, armor, game_field):
         """
         :param weapon: оружие песронажа
         :param armor: броня персонажа
         :param game_field: игровое поле
         """
-        super().__init__(x, y, image, hp, name)
-        self.image = load_image(image)
+        self.image = load_image('Sprites', 'Wall', 'Animations', 'Hero', 'hero.png')
+        super().__init__(x, y, self.image, hp, name)
         self.rect = pg.Rect(x * tile_width, y * tile_height, tile_size)
         self.cell = (x, y)
 
@@ -142,7 +173,7 @@ class MainCharacter(BaseCharacter):
         self.inventory = [weapon, armor, []]
 
     def hit(self, target):
-        target.get_damage(self.weapon.damage)
+        target.get_damage(self.weapon.damage - target.armor)
 
     def change_weapon(self, new_weapon):
         if len(self.inventory[2]) < 6:  # Потом возможно поменяем вместимость
@@ -160,7 +191,7 @@ class BaseEnemy(BaseCharacter):
     Здесь все враги
     """
 
-    def __init__(self, x: int, y: int, image: str, hp: int, name: str, game_field):
+    def __init__(self, x: int, y: int, image: str, hp: int, damage: int, armor: int, name: str, game_field):
         super().__init__(x, y, image, hp, name)
 
         self.image = load_image(image)
@@ -170,7 +201,8 @@ class BaseEnemy(BaseCharacter):
         self.game_field = game_field
         self.drop = None
         self.chance_of_drop = None
-        self.damage = None
+        self.damage = damage
+        self.armor = armor
 
     def hit(self, target):
         target.get_damage(self.damage)
@@ -304,7 +336,6 @@ if __name__ == '__main__':
     text_sprites = pg.sprite.Group([game_title])
 
     game_field = None
-    tiles_sprites = pg.sprite.Group()
     enemies_sprites = pg.sprite.Group()
     main_hero_sprites = pg.sprite.Group()
 
@@ -322,14 +353,14 @@ if __name__ == '__main__':
                                 window = 1
 
                                 game_field = proc_gen(1).my_map
-                                for y, row in enumerate(game_field):
-                                    for x, cell in enumerate(row):
-                                        if cell == '#':
-                                            tiles_sprites.add(
-                                                Tile(x, y, load_image('Sprites', 'Wall', f'{randint(1, 4)}.png')))
-                                        if cell == '_':
-                                            tiles_sprites.add(
-                                                Tile(x, y, load_image('Sprites', 'Floor', f'{randint(1, 5)}.png')))
+                                # for y, row in enumerate(game_field):
+                                #     for x, cell in enumerate(row):
+                                #         if cell == '#':
+                                #             tiles_sprites.add(
+                                #                 Tile(x, y, load_image('Sprites', 'Wall', f'{randint(1, 4)}.png')))
+                                #         if cell == '_':
+                                #             tiles_sprites.add(
+                                #                 Tile(x, y, load_image('Sprites', 'Floor', f'{randint(1, 5)}.png')))
 
                                 screen = pg.display.set_mode(flags=pg.FULLSCREEN)
                                 break
