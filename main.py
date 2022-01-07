@@ -5,7 +5,8 @@ from sys import exit
 import os
 from random import randint
 
-from proc_gen import *
+import proc_gen, consts
+
 from AI import *
 
 start_win_size = (start_win_width, start_win_height) = (600, 400)
@@ -34,18 +35,22 @@ class Tile(pg.sprite.Sprite):
     Класс с основными значениями тайлов
     """
 
-    def __init__(self, x: int, y: int, image: str):  # x и y здесь - это на карте
+    def __init__(self, y: int, x: int, image: str):  # x и y здесь - это на карте
         global tiles_sprites
         super(Tile, self).__init__()
         self.x, self.y = x, y
-        self.si = image
+        self.type = image
         self.inventory = []
         self.character = None
 
         if image == 'wall':  # Я как обычно какую-то херню тут пишу, потом поправь, но типа так должно быть
             self.image = load_image('Sprites', 'Wall', f'{randint(1, 4)}.png')
         elif image == "floor":
-            load_image('Sprites', 'Floor', f'{randint(1, 5)}.png')
+            self.image = load_image('Sprites', 'Floor', f'{randint(1, 5)}.png')
+        elif image == 'none':
+            self.image = load_image('Sprites', 'none.png')
+        elif image == 'ladder':
+            self.image = load_image('Sprites', 'Ladder', '1.png')
         self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
         tiles_sprites.add(self)
         self.cell = (x, y)
@@ -70,13 +75,17 @@ class Tile(pg.sprite.Sprite):
         return bool(self.character)
 
     def get_pos(self):
-        return self.x, self.y
+        return self.y, self.x
 
     def __str__(self):
-        if self.si == 'wall':
+        if self.type == 'wall':
             return '#'
-        if self.si == 'floor':
+        if self.type == 'floor':
             return '_'
+        if self.type == 'none':
+            return '.'
+        if self.type == 'ladder':
+            return 'H'
 
 
 class BaseCharacter(pg.sprite.Sprite):
@@ -94,8 +103,7 @@ class BaseCharacter(pg.sprite.Sprite):
         """
         super().__init__()
 
-        self.image = load_image(image)  # Изображение персонажа добавим позже
-        self.rect = pg.Rect(x * tile_width, y * tile_height, tile_size)
+        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
         self.cell = (x, y)
 
         self.name = name
@@ -154,15 +162,16 @@ class MainCharacter(BaseCharacter):
     Класс ГГ
     """
 
-    def __init__(self, x: int, y: int, hp: int, name: str, weapon, armor, game_field):
+    def __init__(self, y: int, x: int, hp: int, name: str, weapon, armor, game_field):
         """
         :param weapon: оружие песронажа
         :param armor: броня персонажа
         :param game_field: игровое поле
         """
-        self.image = load_image('Sprites', 'Wall', 'Animations', 'Hero', 'hero.png')
+        self.image = consts.HERO_SPRITE
         super().__init__(x, y, self.image, hp, name)
-        self.rect = pg.Rect(x * tile_width, y * tile_height, tile_size)
+
+        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
         self.cell = (x, y)
 
         self.weapon = weapon
@@ -191,11 +200,11 @@ class BaseEnemy(BaseCharacter):
     Здесь все враги
     """
 
-    def __init__(self, x: int, y: int, image: str, hp: int, damage: int, armor: int, name: str, game_field):
+    def __init__(self, y: int, x: int, image: pg.Surface, hp: int, damage: int, armor: int, name: str, game_field):
         super().__init__(x, y, image, hp, name)
 
-        self.image = load_image(image)
-        self.rect = pg.Rect(x * tile_width, y * tile_height, tile_size)
+        self.image = image
+        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
         self.cell = (x, y)
 
         self.game_field = game_field
@@ -228,6 +237,10 @@ class Armor:
         self.armor = armor
         self.sprite = sprite
         self.name = name
+
+
+class Stone:
+    pass
 
 
 class Text(pg.sprite.Sprite):
@@ -352,7 +365,7 @@ if __name__ == '__main__':
                                 print(f'Запускается {btn.index + 1} уровень')
                                 window = 1
 
-                                game_field = proc_gen(1).my_map
+                                game_field = proc_gen.proc_gen(1).my_map
                                 # for y, row in enumerate(game_field):
                                 #     for x, cell in enumerate(row):
                                 #         if cell == '#':
