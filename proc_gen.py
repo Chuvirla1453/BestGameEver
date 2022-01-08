@@ -12,8 +12,8 @@ def proc_gen(level):
 
 class Map:
     def __init__(self, level):
-        self.enemy_count = 5 * level + random.randint(-1, 3 * level)
-        self.room_count = 3 * level + random.randint(-1, 2 * level)
+        self.enemy_count = 15 * level + random.randint(-1, 3 * level)
+        self.room_count = (level * 2) ** 2
         self.width = int(self.room_count ** 0.5 * 10)
         self.height = int(self.room_count ** 0.5 * 10)
         self.my_map = []
@@ -54,7 +54,10 @@ class Map:
         r_map = [[] * r_width for _ in range(r_height)]
         for i in range(r_width):
             for j in range(r_height):
-                r_map[i] += self.rooms[i + j]
+                if self.room_count <= i * r_height + j:
+                    r_map[i] += [['.'] * 10 for _ in range(10)]
+                else:
+                    r_map[i] += self.rooms[i * r_height + j]
         for i in range(len(r_map)):
             for j in range(10):
                 t = []
@@ -66,14 +69,14 @@ class Map:
         for i in range(len(self.my_map)):
             for j in range(len(self.my_map[i])):
                 if self.my_map[i][j] == '_':
-                    t = Tile(i, j, 'floor')
+                    t = Tile(j, i, 'floor')
                     self.floors.append(t)
                     self.my_map[i][j] = t
                 elif self.my_map[i][j] == '#':
-                    t = Tile(i, j, 'wall')
+                    t = Tile(j, i, 'wall')
                     self.my_map[i][j] = t
                 else:
-                    t = Tile(i, j, 'none')
+                    t = Tile(j, i, 'none')
                     self.my_map[i][j] = t
 
         for j in range(4, len(self.my_map[0]), 10):  # Вертикальные коридоры
@@ -90,11 +93,11 @@ class Map:
                     else:
                         cor_flag = False
                         if w_count > 1:
-                            self.my_map[i][j + 1] = Tile(i, j + 1, 'floor')
+                            self.my_map[i][j + 1] = Tile(j + 1, i, 'floor')
                 if cor_flag:
-                    self.my_map[i][j] = Tile(i, j, 'wall')
-                    self.my_map[i][j + 1] = Tile(i, j + 1, 'floor')
-                    self.my_map[i][j + 2] = Tile(i, j + 2, 'wall')
+                    self.my_map[i][j] = Tile(j, i, 'wall')
+                    self.my_map[i][j + 1] = Tile(j + 1, i, 'floor')
+                    self.my_map[i][j + 2] = Tile(j + 2, i, 'wall')
 
         for i in range(4, len(self.my_map), 10):  # Горизонтальные коридоры
             w_count = 0
@@ -110,11 +113,11 @@ class Map:
                     else:
                         cor_flag = False
                         if w_count > 1:
-                            self.my_map[i + 1][j] = Tile(i + 1, j, 'floor')
+                            self.my_map[i + 1][j] = Tile(j, i + 1, 'floor')
                 if cor_flag:
-                    self.my_map[i][j] = Tile(i, j, 'wall')
-                    self.my_map[i + 1][j] = Tile(i + 1, j, 'floor')
-                    self.my_map[i + 2][j] = Tile(i + 2, j, 'wall')
+                    self.my_map[i][j] = Tile(j, i, 'wall')
+                    self.my_map[i + 1][j] = Tile(j, i + 1, 'floor')
+                    self.my_map[i + 2][j] = Tile(j, i + 2, 'wall')
 
     def place(self):
         empty_floors = self.floors.copy()
@@ -123,7 +126,7 @@ class Map:
         self.hero = MainCharacter(self.floors[hero_pos].get_pos()[0], self.floors[hero_pos].get_pos()[1], HERO_HP,
                                   "Hero", DAGGER, LEATHER, self)
 
-        self.my_map[self.floors[hero_pos].get_pos()[0]][self.floors[hero_pos].get_pos()[1]].add_character(self.hero)
+        self.my_map[self.floors[hero_pos].get_pos()[1]][self.floors[hero_pos].get_pos()[0]].add_character(self.hero)
 
         del empty_floors[hero_pos]
 
@@ -131,7 +134,7 @@ class Map:
         # print(empty_floors[-1], empty_floors[-1].get_pos()[0], empty_floors[-5].get_pos()[1], self.my_map[empty_floors[-1].get_pos()[0]][empty_floors[-5].get_pos()[1]])
         # print(empty_floors[-1].get_pos() == self.my_map[empty_floors[-1].get_pos()[0]][empty_floors[-1].get_pos()[1]].get_pos())
 
-        self.my_map[empty_floors[-5].get_pos()[0]][empty_floors[-5].get_pos()[1]] =\
+        self.my_map[empty_floors[-5].get_pos()[1]][empty_floors[-5].get_pos()[0]] =\
             Tile(empty_floors[-5].get_pos()[0], empty_floors[-5].get_pos()[1], 'ladder')
 
         del empty_floors[-5]
@@ -154,11 +157,13 @@ class Map:
             del empty_floors[t]
             t1.add_character(Stone())
 
+    def get_turn(self, n):
+        return self.turns[n]
+
 
 if __name__ == '__main__':
     t = proc_gen(3).my_map
     for i in t:
         print(*i)
-
 
 

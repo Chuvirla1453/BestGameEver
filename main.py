@@ -1,9 +1,9 @@
 import pygame as pg
-from tkinter import Tk
+
 
 from sys import exit
 import os
-from random import randint
+from random import randint, choice
 
 import proc_gen, consts
 
@@ -14,7 +14,7 @@ start_win_size = (start_win_width, start_win_height) = (600, 400)
 start_win_btn_size = (start_win_btn_width, start_win_btn_height) = (140, 70)
 start_win_btns_count = 3
 
-screen_size = (screen_width, screen_height) = (Tk().winfo_screenwidth(), Tk().winfo_screenheight())
+# screen_size = (screen_width, screen_height) = (Tk().winfo_screenwidth(), Tk().winfo_screenheight())
 
 tile_size = (tile_width, tile_height) = (64, 64)
 tiles_sprites = pg.sprite.Group()
@@ -23,10 +23,13 @@ tiles_sprites = pg.sprite.Group()
 def load_image(*path):
     fullname = os.path.join('data', *path)
     # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        exit()
-    image = pg.image.load(fullname)
+    if path[1] == 'none.png':
+        image = pg.image.load(fullname)
+    else:
+        if not os.path.isfile(fullname):
+            print(f"Файл с изображением '{fullname}' не найден")
+            exit()
+        image = pg.image.load(fullname)
     return image
 
 
@@ -35,7 +38,7 @@ class Tile(pg.sprite.Sprite):
     Класс с основными значениями тайлов
     """
 
-    def __init__(self, y: int, x: int, image: str):  # x и y здесь - это на карте
+    def __init__(self, x: int, y: int, image: str):  # x и y здесь - это на карте
         global tiles_sprites
         super(Tile, self).__init__()
         self.x, self.y = x, y
@@ -44,13 +47,13 @@ class Tile(pg.sprite.Sprite):
         self.character = None
 
         if image == 'wall':  # Я как обычно какую-то херню тут пишу, потом поправь, но типа так должно быть
-            self.image = load_image('Sprites', 'Wall', f'{randint(1, 4)}.png')
+            self.image = choice(consts.WALL_SPRITES)
         elif image == "floor":
-            self.image = load_image('Sprites', 'Floor', f'{randint(1, 5)}.png')
+            self.image = choice(consts.FLOOR_SPRITES)
         elif image == 'none':
-            self.image = load_image('Sprites', 'none.png')
+            self.image = consts.NONE_SPRITE
         elif image == 'ladder':
-            self.image = load_image('Sprites', 'Ladder', '1.png')
+            self.image = consts.LADDER_SPRITE
         self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
         tiles_sprites.add(self)
         self.cell = (x, y)
@@ -75,12 +78,18 @@ class Tile(pg.sprite.Sprite):
         return bool(self.character)
 
     def get_pos(self):
-        return self.y, self.x
+        return self.x, self.y
 
     def __str__(self):
         if self.type == 'wall':
             return '#'
         if self.type == 'floor':
+            if type(self.character) == MainCharacter:
+                return 'C'
+            elif type(self.character) == Stone:
+                return 's'
+            elif type(self.character) == BaseEnemy:
+                return 'R'
             return '_'
         if self.type == 'none':
             return '.'
@@ -162,7 +171,7 @@ class MainCharacter(BaseCharacter):
     Класс ГГ
     """
 
-    def __init__(self, y: int, x: int, hp: int, name: str, weapon, armor, game_field):
+    def __init__(self, x: int, y: int, hp: int, name: str, weapon, armor, game_field):
         """
         :param weapon: оружие песронажа
         :param armor: броня персонажа
@@ -200,7 +209,7 @@ class BaseEnemy(BaseCharacter):
     Здесь все враги
     """
 
-    def __init__(self, y: int, x: int, image: pg.Surface, hp: int, damage: int, armor: int, name: str, game_field):
+    def __init__(self, x: int, y: int, image: pg.Surface, hp: int, damage: int, armor: int, name: str, game_field):
         super().__init__(x, y, image, hp, name)
 
         self.image = image
