@@ -1,9 +1,9 @@
 import random
-
-from consts import *
-from main import *
-
 import math
+
+from classes.Cells import *
+from classes.Characters import BaseEnemy, MainCharacter
+from classes.Consts import HERO_HP, RAT_HP, RAT_DAMAGE, RAT_ARMOR, RAT_SPRITE, DAGGER, LEATHER, ENEMIES
 
 
 def proc_gen(level):
@@ -33,11 +33,11 @@ class Map:
         room = [['.'] * 10 for _ in range(10)]
         for i in range(10):
             for j in range(10):
-                f = i in range(5 - (height // 2), 9 - (5 - (height // 2)) + 1) and\
-                        j in range(5 - (width // 2), 9 - (5 - (width // 2)) + 1)
+                f = i in range(5 - (height // 2), 9 - (5 - (height // 2)) + 1) and \
+                    j in range(5 - (width // 2), 9 - (5 - (width // 2)) + 1)
 
-                if (i == 5 - (height // 2) or i == 9 - (5 - (height // 2)) or j == 5 - (width // 2)\
-                        or j == 9 - (5 - (width // 2))) and f:
+                if (i == 5 - (height // 2) or i == 9 - (5 - (height // 2)) or j == 5 - (width // 2) or j == 9 - (
+                        5 - (width // 2))) and f:
                     room[i][j] = '#'
                 elif f:
                     room[i][j] = '_'
@@ -159,12 +159,3 @@ class Map:
             t1 = empty_floors[t]
             del empty_floors[t]
             t1.add_character(Stone())
-
-
-if __name__ == '__main__':
-    t = proc_gen(100).my_map
-    for i in t:
-        print(*i)
-
-
-

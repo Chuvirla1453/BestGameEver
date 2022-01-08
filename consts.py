@@ -1,29 +1,40 @@
 from main import *
+
 """
 В этом файле лежат все константы, чтобы потом их можно было удобно менять
 """
-#___________HERO_______________
+# ___________HERO_______________
 HERO_HP = 6
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')
-#______________________________
+# ______________________________
 
-#___________RAT________________
+# ___________RAT________________
 RAT_HP = 2
 RAT_DAMAGE = 2
 RAT_ARMOR = 0
 RAT_SPRITE = load_image('Sprites', 'Animations', 'Rat', 'rat.png')
-#______________________________
+# ______________________________
 
-#__________WEAPONS______________
+# __________WEAPONS______________
 DAGGER = Weapon(1, load_image('Sprites', 'Weapons', 'dagger.png'), 'dagger')
 AXE = Weapon(3, load_image('Sprites', 'Weapons', 'axe.png'), 'axe')
-#_______________________________
+# _______________________________
 
-#_________ARMORS________________
+# _________ARMORS________________
 LEATHER = Armor(1, load_image('Sprites', 'Armor', 'leather.png'), 'leather armor')
 CHAIN = Armor(2, load_image('Sprites', 'Armor', 'chain.png'), 'chain armor')
-#_______________________________
+# _______________________________
 
-#________OTHER__________________
+# ________OTHER__________________
 ENEMIES = ['rat']
-#_______________________________
+# _______________________________
+
+
+# _____ELEMENTS_SIZE_____________
+start_win_size = (start_win_width, start_win_height) = (600, 400)
+
+start_win_btn_size = (start_win_btn_width, start_win_btn_height) = (140, 70)
+start_win_btns_count = 3
+
+tile_size = (tile_width, tile_height) = (64, 64)
+# _______________________________
