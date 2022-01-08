@@ -2,8 +2,8 @@ import pygame as pg
 from random import choice
 
 #  from classes.Secondary_functions import load_image
-from classes.Characters import BaseEnemy, MainCharacter
-from classes.Consts import (LADDER_SPRITE, NONE_SPRITE, FLOOR_SPRITES, STONE_SPRITE,
+from Classes.Characters import BaseEnemy, MainCharacter
+from Classes.Consts import (LADDER_SPRITE, NONE_SPRITE, FLOOR_SPRITES, STONE_SPRITE,
                             WALL_SPRITES, tile_size, tile_width, tile_height)
 
 

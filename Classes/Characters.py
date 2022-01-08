@@ -1,6 +1,6 @@
 import pygame as pg
 
-from classes.Secondary_functions import load_image
+from Classes.Secondary_functions import load_image
 
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')
 tile_size = (tile_width, tile_height) = (64, 64)

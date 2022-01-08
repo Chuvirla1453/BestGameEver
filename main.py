@@ -1,11 +1,11 @@
-from classes.AI import *
-from classes.Cells import *
-from classes.Characters import *
-from classes.Errors import *
-from classes.Consts import *
-from classes.Menu_elements import *
-from classes.Proc_gen import proc_gen
-from classes.Secondary_functions import *
+from Classes.AI import *
+from Classes.Cells import *
+from Classes.Characters import *
+from Classes.Errors import *
+from Classes.Consts import *
+from Classes.Menu_elements import *
+from Classes.Proc_gen import proc_gen
+from Classes.Secondary_functions import *
 
 import pygame as pg
 from math import ceil
@@ -82,6 +82,7 @@ if __name__ == '__main__':
     fps = 60
 
     pg.init()
+    pg.mixer.music.play()
 
     window = 0
     screen = pg.display.set_mode(start_win_size)
