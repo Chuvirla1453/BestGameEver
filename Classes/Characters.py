@@ -49,15 +49,10 @@ class BaseCharacter(pg.sprite.Sprite):
         """Получить координаты персонажа"""
         return self.rect.x, self.rect.y
 
-    def set_cell(self, x: int, y: int) -> None:
-        """Установить клетку персонажа"""
-        self.cell = (x, y)
-        self.rect.x, self.rect.y = x * tile_width, y * tile_height
-
-    def set_coors(self, x: int, y: int) -> None:
+    def set_pos(self, x: int, y: int) -> None:
         """Установить координаты персонажа"""
-        self.rect.x, self.rect.y = x, y
-        self.cell = (x // self.rect.width, y // self.rect.height)
+        self.rect.x, self.rect.y = x * tile_width, y * tile_height
+        self.cell = (x, y)
 
 
 class MainCharacter(BaseCharacter):

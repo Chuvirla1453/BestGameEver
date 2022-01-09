@@ -12,7 +12,6 @@ class Tile(pg.sprite.Sprite):
 
     def __init__(self, x: int, y: int, image: str):  # x и y здесь - это на карте
         super(Tile, self).__init__()
-        self.x, self.y = x, y
         self.type = image
         self.inventory = []
         self.character = None
@@ -50,7 +49,11 @@ class Tile(pg.sprite.Sprite):
         return bool(self.character)
 
     def get_pos(self):
-        return self.x, self.y
+        return self.cell
+
+    def set_pos(self, x_: int, y_: int):
+        self.rect = pg.Rect(x_ * tile_width, y_ * tile_height, *tile_size)
+        self.cell = (x_, y_)
 
     def __str__(self):
         if self.type == 'wall':  # стенка

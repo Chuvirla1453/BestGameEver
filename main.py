@@ -47,31 +47,43 @@ def clear_all_sprite_groups() -> None:
     main_hero_sprites.empty()
 
 
-def field_increase(field):
+def field_increase(field_):
     """
     Увеличение игрового поля спрайтами пустоты, чтобы не было пустых зон
     """
-    for i_ in range(len(field)):
-        if field[i_]:
-            field[i_] = ['.'] * 17 + field[i_] + ['.'] * 17
+    for i_ in range(len(field_)):  # Добавление ктолок по бокам
+        if field_[i_]:
+            for j in range(14):
+                field_[i_].insert(0, Tile(-1, -1, 'none'))
+                field_[i_].insert(-1, Tile(-1, -1, 'none'))
         else:
-            field[i_] = ['.'] * len(field[i_ - 1])
+            field_[i_] = [Tile(-1, -1, 'none') for i in range(len(field_[0]))]
 
-    return list(map(lambda x: ['.'] * len(field[0]), range(14))) + field + list(
-        map(lambda x: ['.'] * len(field[0]), range(14)))
+    for i_ in range(14):  # Добавление клеток сверху и снизу
+        field_.insert(0, [Tile(-1, -1, 'none') for k_ in range(len(field_[1]))])
+        field_.insert(-1, [Tile(-1, -1, 'none') for k_ in range(len(field_[1]))])
+
+    for y_ in range(len(field_)):  # Установка правильных координат
+        for x_ in range(len(field_[y_])):
+            field_[y_][x_].set_pos(x_, y_)
+            if field_[y_][x_].character is not None and not isinstance(field_[y_][x_].character, Stone):
+                field_[y_][x_].character.set_pos(x_, y_)
+
+    return field_
 
 
-def find_player(field: list, player_sign: str) -> (int, int):
+def find_player(field_: list, player_sign_: str) -> (int, int):
     """
     Функция игрока на поле и возвращает координату клетки
     """
     player = None
-    for y_, row_ in enumerate(field):
-        if player_sign in row_:
-            if player is None:
-                player = (row_.index(player_sign), y_)
-            else:
-                raise MultiplicityPlayersError('Несколько игроков на поле')
+    for y_, row_ in enumerate(field_):
+        for x_, cell_ in enumerate(row_):
+            if str(cell_) == player_sign_:
+                if player is None:
+                    player = (x_, y_)
+                else:
+                    raise MultiplicityPlayersError('Несколько игроков на поле')
 
     if player is None:
         raise PlayerNotFoundError('Игрок не обнаружен на поле')
@@ -94,8 +106,7 @@ if __name__ == '__main__':
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
     text_sprites = pg.sprite.Group([game_title])
 
-    sprite_field = []
-    str_field = []
+    field = []
 
     while True:
         if window == 0:
@@ -104,61 +115,54 @@ if __name__ == '__main__':
                     terminate()
 
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 1: # Обработка нажаяти левой кнопки мыши
+                    if event.button == 1:  # Обработка нажаяти левой кнопки мыши
                         for btn in start_btns_sprites:
                             if btn.crossed(*event.pos):  # Здесь должна происходить загрузка уровня
+                                clear_all_sprite_groups()
                                 # Изменение размера окна под игру
                                 screen = pg.display.set_mode(flags=pg.FULLSCREEN)
                                 pg.display.set_caption(f'{btn.index + 1}-й уровень')
 
                                 # Создание поля
-                                str_field = field_increase(
-                                    list(map(lambda i: list(map(lambda j: str(j), i)), proc_gen(btn.index + 1).my_map)))
-                                for i in str_field:
-                                    print(*i)
-                                start_x, start_y = find_player(str_field, 'C')
+                                field = field_increase(proc_gen(btn.index + 1).my_map)
 
-                                clear_all_sprite_groups()
+                                start_x, start_y = find_player(field, HERO_SIGN)
 
-                                # Создание спрайтов тайлов
-                                for y, row in enumerate(str_field):
+                                # Распределение тайлов по группам
+                                for y, row_ in enumerate(field):
                                     y = y - start_y + ceil(screen.get_width() / tile_width / 3)
-                                    for x, cell in enumerate(row):
+                                    for x, cell in enumerate(row_):
                                         x = x - start_x + ceil(screen.get_height() / tile_height / 2)
 
-                                        if cell == NONE_SIGN:
-                                            none_sprites.add(Tile(x, y, 'none'))
-                                        if cell == FLOOR_SIGN:
-                                            floor_sprites.add(Tile(x, y, 'floor'))
-                                        if cell == WALL_SIGN:
-                                            wall_sprites.add(Tile(x, y, 'wall'))
-                                        if cell == STONE_SIGN:
-                                            floor_sprites.add(Tile(x, y, 'floor'))
-                                            stone_sprites.add(Tile(x, y, 'stone'))
-                                        if cell == RAT_SIGN:
-                                            some_tile = Tile(x, y, 'floor')
-                                            some_tile.character = BaseEnemy(x, y, RAT_SPRITE, RAT_HP,
-                                                                            RAT_DAMAGE, RAT_ARMOR, 'Крыса', -1)
-                                            floor_sprites.add(some_tile)
-                                            enemy_sprites.add(some_tile.character)
-                                        if cell == HERO_SIGN:
-                                            some_tile = Tile(x, y, 'floor')
-                                            some_tile.character = MainCharacter(x, y, HERO_HP, 'GG', -1, -1, -1)
+                                        if str(cell) == NONE_SIGN:
+                                            none_sprites.add(cell)
 
-                                            floor_sprites.add(some_tile)
-                                            main_hero_sprites.add(some_tile.character)
-                                        if cell == LADDER_SIGN:
-                                            some_tile = Tile(x, y, 'floor')
-                                            some_tile.character = Tile(x, y, 'ladder')
+                                        if str(cell) == FLOOR_SIGN:
+                                            floor_sprites.add(cell)
 
-                                            floor_sprites.add(some_tile)
-                                            ladder_sprites.add(some_tile.character)
+                                        if str(cell) == WALL_SIGN:
+                                            wall_sprites.add(cell)
+
+                                        if str(cell) == STONE_SIGN:
+                                            floor_sprites.add(cell)
+                                            # stone_sprites.add(cell.character)
+
+                                        if str(cell) == RAT_SIGN:
+                                            floor_sprites.add(cell)
+                                            enemy_sprites.add(cell.character)
+
+                                        if str(cell) == HERO_SIGN:
+                                            floor_sprites.add(cell)
+                                            main_hero_sprites.add(cell.character)
+
+                                        if str(cell) == LADDER_SIGN:
+                                            ladder_sprites.add(cell)
 
                                 # Изменение состояния окна
                                 window = 1
                                 break
 
-            # Отрисовка спрайтов окна
+            # Отрисовка спрайтов окна меню
             text_sprites.draw(screen)
             start_btns_sprites.draw(screen)
 
