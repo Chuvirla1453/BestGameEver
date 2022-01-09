@@ -70,6 +70,7 @@ HIT_SND = load_music('Sounds', 'hit.mp3')
 WALK_IN_WALL_SND = load_music('Sounds', 'walk_in_wall.mp3')
 JUMP_SND = load_music('Sounds', 'jump.mp3')
 LADDER_SND = load_music('Sounds', 'ladder.mp3')
+PICK_SND = load_music('Sounds', 'pick.mp3')
 GAZ = load_music('Sounds', 'Gaz.mp3')  # И ещё раз спасибо
 GAZ.play(-1)
 '''______________________________'''

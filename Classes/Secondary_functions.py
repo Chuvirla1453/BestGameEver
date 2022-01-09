@@ -5,7 +5,7 @@ import os
 tile_size = (tile_width, tile_height) = (64, 64)
 
 pg.init()
-pg.mixer.music.load('data\Sounds\GAZ.mp3')  # Спасибо Тиму за музончик, мне нравится
+pg.mixer.music.load('data\\Sounds\\launch.mp3')  # Спасибо Тиму за музончик, мне нравится
 
 
 def align(display_length: int, sprite_length: int) -> int:
@@ -32,7 +32,6 @@ def load_image(*path) -> pg.Surface:
 
 def load_music(*path):
     fullname = os.path.join('data', *path)
-    print(fullname)
     if not os.path.isfile(fullname):
         exit()
     music = pg.mixer.Sound(fullname)

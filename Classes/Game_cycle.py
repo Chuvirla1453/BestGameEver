@@ -6,6 +6,10 @@ from Classes.Characters import *
 from Classes.Consts import *
 
 
+def cycle():
+    pass
+
+
 def make_turn(field):
     while True:
         delta = ()
@@ -41,6 +45,16 @@ def make_turn(field):
                 LADDER_SND.play()
             else:
                 WALK_IN_WALL_SND.play()
+        if action:
+            check_cell = field.hero.get_cell()
+            if not field[check_cell[1]][check_cell[0]].has_item():
+                WALK_IN_WALL_SND.play()
+            else:
+                PICK_SND.play()
+                if isinstance(field[check_cell[1]][check_cell[0]].inventory[-1], Weapon):
+                    field.hero.change_weapon(field[check_cell[1]][check_cell[0]].inventory[-1])
+                elif isinstance(field[check_cell[1]][check_cell[0]].inventory[-1], Armor):
+                    field.hero.change_armor(field[check_cell[1]][check_cell[0]].inventory[-1])
 
 
 def new_level():

@@ -157,7 +157,7 @@ class Map:
             tg = random.randrange(len(empty_floors))
             t1 = empty_floors[tg]
             del empty_floors[tg]
-            t1.add_character(Stone())
+            t1.add_character(Stone(t1.get_pos()[0], t1.get_pos()[1]))
 
     def get_turn(self, n):
         return self.turns[n]

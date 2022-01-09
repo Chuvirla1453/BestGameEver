@@ -89,14 +89,26 @@ class MainCharacter(BaseCharacter):
         target.get_damage(self.weapon.damage - target.armor)
 
     def change_weapon(self, new_weapon):
+        del self.game_field.my_map[self.rect.y][self.rect.x].inventory[-1]
         if len(self.inventory[2]) < 6:  # Потом возможно поменяем вместимость
             self.inventory[2].append(self.weapon)
             self.weapon = new_weapon
             self.inventory[0] = new_weapon
         else:
-            self.game_field.search_tile(self.rect.x, self.rect.y).add_item(self.weapon)
+            self.game_field.my_map[self.rect.y][self.rect.x].add_item(self.weapon)
             self.weapon = new_weapon
             self.inventory[0] = new_weapon
+
+    def change_armor(self, new_armor):
+        del self.game_field.my_map[self.rect.y][self.rect.x].inventory[-1]
+        if len(self.inventory[2]) < 6:  # Потом возможно поменяем вместимость
+            self.inventory[2].append(self.weapon)
+            self.armor = new_armor
+            self.inventory[1] = new_armor
+        else:
+            self.game_field.my_map[self.rect.y][self.rect.x].add_item(self.weapon)
+            self.armor = new_armor
+            self.inventory[1] = new_armor
 
 
 class BaseEnemy(BaseCharacter):
@@ -118,7 +130,7 @@ class BaseEnemy(BaseCharacter):
         self.armor = armor
 
     def hit(self, target):
-        target.get_damage(self.damage)
+        target.get_damage(self.damage - target.armor.armor)
 
 
 class Weapon:

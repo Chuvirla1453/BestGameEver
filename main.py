@@ -82,7 +82,6 @@ if __name__ == '__main__':
     fps = 60
 
     pg.init()
-    pg.mixer.music.play()
 
     window = 0
     screen = pg.display.set_mode(start_win_size)
