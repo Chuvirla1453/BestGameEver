@@ -15,27 +15,28 @@ def align(display_length: int, sprite_length: int) -> int:
 
 def create_sprite(x: int, y: int, image: pg.Surface, step_x=0, step_y=0) -> pg.sprite.Sprite:
     sprite_ = pg.sprite.Sprite()
-    sprite_.rect = pg.Rect(x * tile_width + step_x, y * tile_height + step_y, *tile_size)
+    sprite_.rect = pg.Rect(step_x + x * tile_width, step_y + y * tile_height, *tile_size)
     sprite_.image = image
     return sprite_
 
 
 def load_image(*path) -> pg.Surface:
+    """Загрузка изображения"""
     fullname = os.path.join('data', *path)
-    # если файл не существует, то выходим
     if not os.path.isfile(fullname):
-
+        print(f'Изображение {fullname} не найдено: работа проограммы прекращена')
         exit()
     image = pg.image.load(fullname)
     return image
 
 
 def load_music(*path):
+    """Загрузка медиафайла"""
     fullname = os.path.join('data', *path)
     if not os.path.isfile(fullname):
+        print(f'Медиа-файл {fullname} не найден: работа проограммы прекращена')
         exit()
     music = pg.mixer.Sound(fullname)
-
     return music
 
 

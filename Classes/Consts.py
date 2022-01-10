@@ -1,5 +1,5 @@
-from Classes.Secondary_functions import load_image, load_music
-from Classes.Characters import Armor, Weapon
+from classes.Secondary_functions import load_image, load_music
+from classes.Characters import Armor, Weapon
 
 """В этом файле лежат все константы, чтобы потом их можно было удобно менять"""
 
@@ -54,12 +54,12 @@ ENEMIES = ['rat']
 
 
 '''_____ELEMENTS_SIZE_____________'''
-start_win_size = (start_win_width, start_win_height) = (600, 400)
+START_WIN_SIZE = (start_win_width, start_win_height) = (600, 400)
 
-start_win_btn_size = (start_win_btn_width, start_win_btn_height) = (140, 70)
-start_win_btns_count = 3
+START_WIN_SIZE_SIZE = (start_win_btn_width, start_win_btn_height) = (140, 70)
+START_WIN_SIZE_COUNT = 3
 
-tile_size = (tile_width, tile_height) = (64, 64)  # +Characters, Secondary_functions
+TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)  # +Characters, Secondary_functions
 '''______________________________'''
 
 '''________MUSIC_________________'''

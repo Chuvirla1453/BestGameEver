@@ -1,24 +1,24 @@
 from heapq import heappush, heappop
 
-from Classes.Cells import *
-from Classes.Characters import *
+from classes.Cells import *
+from classes.Characters import *
 
 
-def calculate_turn(enemy, gamefield):
-    path = a_star(gamefield.my_map, enemy.get_cell(), gamefield.hero.get_cell())
+def calculate_turn(enemy, game_field):
+    path = a_star(game_field.my_map, enemy.get_cell(), game_field.hero.get_cell())
     print(path)
     if len(path) > 10:
         return
     if len(path) == 2:
-        enemy.hit(gamefield.hero)
+        enemy.hit(game_field.hero)
         return
-    if type(gamefield[path[1][0]][path[1][1]].character) == Stone:
-        gamefield[path[1][0]][path[1][1]].add_character(None)
+    if type(game_field[path[1][0]][path[1][1]].character) == Stone:
+        game_field[path[1][0]][path[1][1]].add_character(None)
         return
-    if type(gamefield[path[1][0]][path[1][1]].character) == BaseEnemy:
+    if type(game_field[path[1][0]][path[1][1]].character) == BaseEnemy:
         return
-    gamefield[path[0][0]][path[0][1]].add_character(None)
-    gamefield[path[1][0]][path[1][1]].add_character(enemy)
+    game_field[path[0][0]][path[0][1]].add_character(None)
+    game_field[path[1][0]][path[1][1]].add_character(enemy)
     enemy.move(path[1][1] - path[0][1], path[1][0] - path[0][0])
 
 
@@ -74,10 +74,10 @@ def a_star(field, start, goal):
 
 
 def heuristic(a, b):
-   return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def get_next_nodes(x, y, cols, rows, my_field):
-    check_next_node = lambda x, y: True if 0 <= x < cols and 0 <= y < rows else False
+    check_next_node = lambda x, y: 0 <= x < cols and 0 <= y < rows
     ways = [-1, 0], [0, -1], [1, 0], [0, 1]
     return [(my_field[y + dy][x + dx], (x + dx, y + dy)) for dx, dy in ways if check_next_node(x + dx, y + dy)]
