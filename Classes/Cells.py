@@ -75,6 +75,7 @@ class Tile(pg.sprite.Sprite):
             return 'H'
 
 
+
 class Stone:
     def __init__(self, x: int, y: int):
         self.x = x
