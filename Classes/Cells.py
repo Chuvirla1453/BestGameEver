@@ -1,10 +1,9 @@
 import pygame as pg
 from random import choice
 
-#  from classes.Secondary_functions import load_image
 from Classes.Characters import BaseEnemy, MainCharacter
 from Classes.Consts import (LADDER_SPRITE, NONE_SPRITE, FLOOR_SPRITES, STONE_SPRITE,
-                            WALL_SPRITES, tile_size, tile_width, tile_height)
+                            WALL_SPRITES, TILE_SIZE, TILE_WIDTH, TILE_HEIGHT)
 
 
 class Tile(pg.sprite.Sprite):
@@ -12,7 +11,6 @@ class Tile(pg.sprite.Sprite):
 
     def __init__(self, x: int, y: int, image: str):  # x и y здесь - это на карте
         super(Tile, self).__init__()
-        self.x, self.y = x, y
         self.type = image
         self.inventory = []
         self.character = None
@@ -27,7 +25,7 @@ class Tile(pg.sprite.Sprite):
             self.image = LADDER_SPRITE
         elif image == 'stone':
             self.image = choice(STONE_SPRITE)
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
         self.cell = (x, y)
 
     def render_lying_object(self):
@@ -50,7 +48,11 @@ class Tile(pg.sprite.Sprite):
         return bool(self.character)
 
     def get_pos(self):
-        return self.x, self.y
+        return self.cell
+
+    def set_pos(self, x_: int, y_: int):
+        self.rect = pg.Rect(x_ * TILE_WIDTH, y_ * TILE_HEIGHT, *TILE_SIZE)
+        self.cell = (x_, y_)
 
     def __str__(self):
         if self.type == 'wall':  # стенка
@@ -72,5 +74,12 @@ class Tile(pg.sprite.Sprite):
             return 'H'
 
 
-class Stone:
-    pass
+class Stone(pg.sprite.Sprite):
+    def __init__(self, x: int, y: int):
+        super().__init__()
+
+        self.image = choice(STONE_SPRITE)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
+
+    def set_pos(self, x: int, y: int):
+        self.rect.x, self.rect.y = x * TILE_WIDTH, y * TILE_HEIGHT

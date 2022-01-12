@@ -14,6 +14,8 @@ class Map:
     def __init__(self, level):
         self.enemy_count = 15 * level + random.randint(-1, 3 * level)
         self.room_count = (level * 2) ** 2
+        self.enemy_count = 1
+        self.room_count = 1
         self.width = int(self.room_count ** 0.5 * 10)
         self.height = int(self.room_count ** 0.5 * 10)
         self.my_map = []
@@ -140,7 +142,6 @@ class Map:
             Tile(empty_floors[-5].get_pos()[0], empty_floors[-5].get_pos()[1], 'ladder')
 
         del empty_floors[-5]
-
         for _ in range(self.enemy_count):
             tg = random.randrange(len(empty_floors))
             t1 = empty_floors[tg]
@@ -157,10 +158,7 @@ class Map:
             tg = random.randrange(len(empty_floors))
             t1 = empty_floors[tg]
             del empty_floors[tg]
-            t1.add_character(Stone())
-
-    def get_turn(self, n):
-        return self.turns[n]
+            t1.add_character(Stone(t1.get_pos()[0], t1.get_pos()[1]))
 
 
 if __name__ == '__main__':

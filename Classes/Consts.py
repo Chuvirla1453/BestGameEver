@@ -54,12 +54,12 @@ ENEMIES = ['rat']
 
 
 '''_____ELEMENTS_SIZE_____________'''
-start_win_size = (start_win_width, start_win_height) = (600, 400)
+START_WIN_SIZE = (start_win_width, start_win_height) = (600, 400)
 
-start_win_btn_size = (start_win_btn_width, start_win_btn_height) = (140, 70)
-start_win_btns_count = 3
+START_WIN_SIZE_SIZE = (start_win_btn_width, start_win_btn_height) = (140, 70)
+START_WIN_SIZE_COUNT = 3
 
-tile_size = (tile_width, tile_height) = (64, 64)  # +Characters, Secondary_functions
+TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)  # +Characters, Secondary_functions
 '''______________________________'''
 
 '''________MUSIC_________________'''
@@ -68,8 +68,8 @@ WALK_SND = load_music('Sounds', 'walk.mp3')
 GETTING_HIT_SND = load_music('Sounds', 'getting_hit.mp3')
 HIT_SND = load_music('Sounds', 'hit.mp3')
 WALK_IN_WALL_SND = load_music('Sounds', 'walk_in_wall.mp3')
-JUMP_SND = load_music('Sounds', 'jump.mp3')
 LADDER_SND = load_music('Sounds', 'ladder.mp3')
+PICK_SND = load_music('Sounds', 'pick.mp3')
 GAZ = load_music('Sounds', 'Gaz.mp3')  # И ещё раз спасибо
-GAZ.play(-1)
+# GAZ.play(-1)
 '''______________________________'''

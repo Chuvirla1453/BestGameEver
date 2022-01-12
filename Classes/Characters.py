@@ -1,9 +1,15 @@
 import pygame as pg
 
-from Classes.Secondary_functions import load_image
+from Classes.Secondary_functions import load_image, load_music
 
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')
-tile_size = (tile_width, tile_height) = (64, 64)
+TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)
+
+"""_________SOME SOUNDS______________"""
+RAT_ATTACK = load_music('Sounds', 'rat_attack.mp3')
+RAT_DIE = load_music('Sounds', 'rat_die.mp3')
+JUMP_SND = load_music('Sounds', 'jump.mp3')
+"""___________________________________"""
 
 
 class BaseCharacter(pg.sprite.Sprite):
@@ -19,7 +25,7 @@ class BaseCharacter(pg.sprite.Sprite):
         super().__init__()
 
         self.image = image
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
 
         self.cell = (x, y)
 
@@ -32,8 +38,9 @@ class BaseCharacter(pg.sprite.Sprite):
 
     def move(self, dx: int, dy: int) -> None:
         """Передвинуть персонажа"""
-        self.rect.x += dx
-        self.rect.y += dy
+        self.rect.x += dx * TILE_WIDTH
+        self.rect.y += dy * TILE_HEIGHT
+        self.cell = (self.cell[0] + dx, self.cell[1] + dy)
 
     def get_damage(self, damage: int):
         """Ранение персонажа"""
@@ -49,15 +56,9 @@ class BaseCharacter(pg.sprite.Sprite):
         """Получить координаты персонажа"""
         return self.rect.x, self.rect.y
 
-    def set_cell(self, x: int, y: int) -> None:
-        """Установить клетку персонажа"""
-        self.cell = (x, y)
-        self.rect.x, self.rect.y = x * tile_width, y * tile_height
-
-    def set_coors(self, x: int, y: int) -> None:
+    def set_pos(self, x: int, y: int) -> None:
         """Установить координаты персонажа"""
-        self.rect.x, self.rect.y = x, y
-        self.cell = (x // self.rect.width, y // self.rect.height)
+        self.rect.x, self.rect.y = x * TILE_WIDTH, y * TILE_HEIGHT
 
 
 class MainCharacter(BaseCharacter):
@@ -74,7 +75,7 @@ class MainCharacter(BaseCharacter):
         self.image = HERO_SPRITE
         super().__init__(x, y, self.image, hp, name)
 
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
 
         self.cell = (x, y)
 
@@ -89,14 +90,26 @@ class MainCharacter(BaseCharacter):
         target.get_damage(self.weapon.damage - target.armor)
 
     def change_weapon(self, new_weapon):
+        del self.game_field.my_map[self.rect.y][self.rect.x].inventory[-1]
         if len(self.inventory[2]) < 6:  # Потом возможно поменяем вместимость
             self.inventory[2].append(self.weapon)
             self.weapon = new_weapon
             self.inventory[0] = new_weapon
         else:
-            self.game_field.search_tile(self.rect.x, self.rect.y).add_item(self.weapon)
+            self.game_field.my_map[self.rect.y][self.rect.x].add_item(self.weapon)
             self.weapon = new_weapon
             self.inventory[0] = new_weapon
+
+    def change_armor(self, new_armor):
+        del self.game_field.my_map[self.rect.y][self.rect.x].inventory[-1]
+        if len(self.inventory[2]) < 6:  # Потом возможно поменяем вместимость
+            self.inventory[2].append(self.weapon)
+            self.armor = new_armor
+            self.inventory[1] = new_armor
+        else:
+            self.game_field.my_map[self.rect.y][self.rect.x].add_item(self.weapon)
+            self.armor = new_armor
+            self.inventory[1] = new_armor
 
 
 class BaseEnemy(BaseCharacter):
@@ -108,7 +121,7 @@ class BaseEnemy(BaseCharacter):
         super().__init__(x, y, image, hp, name)
 
         self.image = image
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
         self.cell = (x, y)
 
         self.game_field = game_field
@@ -117,8 +130,13 @@ class BaseEnemy(BaseCharacter):
         self.damage = damage
         self.armor = armor
 
+        if name == 'rat':
+            self.death_snd = RAT_DIE
+            self.attack_snd = RAT_ATTACK
+            self.walk_snd = JUMP_SND
+
     def hit(self, target):
-        target.get_damage(self.damage)
+        target.get_damage(self.damage - target.armor.armor)
 
 
 class Weapon:
