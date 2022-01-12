@@ -1,11 +1,12 @@
-from Classes.AI import *
-from Classes.Cells import *
-from Classes.Characters import *
-from Classes.Errors import *
-from Classes.Consts import *
-from Classes.Menu_elements import *
-from Classes.Proc_gen import proc_gen
-from Classes.Secondary_functions import *
+# from classes.AI import *
+# from classes.Cells import *
+# from classes.Characters import *
+from classes.Errors import *
+from classes.Game_cycle import *
+from classes.Consts import *
+from classes.Menu_elements import *
+from classes.Proc_gen import proc_gen
+from classes.Secondary_functions import *
 
 import pygame as pg
 from math import ceil
@@ -20,18 +21,7 @@ ladder_sprites = pg.sprite.Group()
 enemy_sprites = pg.sprite.Group()
 main_hero_sprites = pg.sprite.Group()
 
-sprite_groups = floor_sprites, wall_sprites, none_sprites, stone_sprites, ladder_sprites, enemy_sprites
-
-
-def set_start_win_btns(y: int, win_width: int, btn_width: int, btn_height: int, btn_count: int,
-                       text_color: (int, int, int), back_color: (int, int, int)) -> pg.sprite.Group:
-    """
-    Генерация заданного количесва кнопок с опреденным шаблном
-    """
-    dist_btns = (win_width - btn_width * btn_count) // (btn_count + 1)
-    btns_sprites_ = pg.sprite.Group([Button(x, x * (btn_width + dist_btns) + dist_btns, y, btn_width, btn_height,
-                                            f'{x + 1} уровень', 30, text_color, back_color) for x in range(btn_count)])
-    return btns_sprites_
+sprite_groups = (floor_sprites, wall_sprites, none_sprites, stone_sprites, ladder_sprites, enemy_sprites)
 
 
 def clear_all_sprite_groups() -> None:
@@ -47,34 +37,49 @@ def clear_all_sprite_groups() -> None:
     main_hero_sprites.empty()
 
 
-def field_increase(field_):
+def field_increase(field_: list):
     """
     Увеличение игрового поля спрайтами пустоты, чтобы не было пустых зон
     """
     for i_ in range(len(field_)):  # Добавление ктолок по бокам
         if field_[i_]:
-            for j in range(14):
+            for j in range(17):
                 field_[i_].insert(0, Tile(-1, -1, 'none'))
                 field_[i_].insert(-1, Tile(-1, -1, 'none'))
         else:
             field_[i_] = [Tile(-1, -1, 'none') for i in range(len(field_[0]))]
 
     for i_ in range(14):  # Добавление клеток сверху и снизу
-        field_.insert(0, [Tile(-1, -1, 'none') for k_ in range(len(field_[1]))])
-        field_.insert(-1, [Tile(-1, -1, 'none') for k_ in range(len(field_[1]))])
-
-    for y_ in range(len(field_)):  # Установка правильных координат
-        for x_ in range(len(field_[y_])):
-            field_[y_][x_].set_pos(x_, y_)
-            if field_[y_][x_].character is not None and not isinstance(field_[y_][x_].character, Stone):
-                field_[y_][x_].character.set_pos(x_, y_)
+        field_.insert(0, list(map(lambda x: Tile(-1, -1, 'none'), range(len(field_[1])))))
+        field_.insert(len(field_), list(map(lambda x: Tile(-1, -1, 'none'), range(len(field_[1])))))
 
     return field_
 
 
+def filling_sprite_groups(cell_):
+    """Распределение тайла в группу спрайтов"""
+    if str(cell_) == NONE_SIGN:  # Пустота
+        none_sprites.add(cell)
+    if str(cell_) == FLOOR_SIGN:  # Пол
+        floor_sprites.add(cell)
+    if str(cell_) == WALL_SIGN:  # Стена
+        wall_sprites.add(cell)
+    if str(cell_) == STONE_SIGN:  # Камень
+        floor_sprites.add(cell)
+        stone_sprites.add(cell.character)
+    if str(cell_) == RAT_SIGN:  # Крыса
+        floor_sprites.add(cell)
+        enemy_sprites.add(cell.character)
+    if str(cell_) == HERO_SIGN:  # Главный герой
+        floor_sprites.add(cell)
+        main_hero_sprites.add(cell.character)
+    if str(cell_) == LADDER_SIGN:  # Лесница
+        ladder_sprites.add(cell)
+
+
 def find_player(field_: list, player_sign_: str) -> (int, int):
     """
-    Функция игрока на поле и возвращает координату клетки
+    Функция поиска игрока на поле и возвращает координату клетки
     """
     player = None
     for y_, row_ in enumerate(field_):
@@ -90,17 +95,45 @@ def find_player(field_: list, player_sign_: str) -> (int, int):
     return player
 
 
+def set_sprites_pos(field_: list, s_x: int, s_y: int):
+    """Установка координат тайлов по отношению к позтции ГГ"""
+    for y_, row_ in enumerate(field_):
+        y_ = y_ - s_y + ceil(screen.get_width() // tile_width // 4)
+
+        for x_, cell_ in enumerate(row_):
+            x_ = x_ - s_x + ceil(screen.get_height() // TILE_HEIGHT)
+
+            cell_.set_pos(x_, y_)
+            if cell_.character is not None:
+                cell_.character.set_pos(x_, y_)
+
+
+def set_start_win_btns(y_: int, win_width: int, btn_width: int, btn_height: int, btn_count: int,
+                       text_color: (int, int, int), back_color: (int, int, int)) -> pg.sprite.Group:
+    """
+    Генерация заданного количесва кнопок с опреденным шаблном
+    """
+    dist_btns = (win_width - btn_width * btn_count) // (btn_count + 1)
+    btns_sprites_ = pg.sprite.Group()
+
+    for x_ in range(btn_count):
+        btns_sprites_.add(
+            Button(x_, x_ * (btn_width + dist_btns) + dist_btns, y_, btn_width, btn_height, f'{x_ + 1} уровень', 30,
+                   text_color, back_color))
+    return btns_sprites_
+
+
 if __name__ == '__main__':
     fps = 60
 
     pg.init()
 
     window = 0
-    screen = pg.display.set_mode(start_win_size)
+    screen = pg.display.set_mode(START_WIN_SIZE)
     pg.display.set_caption('Стартовое окно')
 
     start_btns_sprites = set_start_win_btns(300, start_win_width, start_win_btn_width, start_win_btn_height,
-                                            start_win_btns_count, (0, 255, 0), (0, 0, 0))
+                                            START_WIN_SIZE_COUNT, (0, 255, 0), (0, 0, 0))
 
     game_title = Text(40, 40, 'The Best Game Ever', 30, (0, 255, 0), (0, 0, 0))
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
@@ -125,38 +158,15 @@ if __name__ == '__main__':
 
                                 # Создание поля
                                 field = field_increase(proc_gen(btn.index + 1).my_map)
-
                                 start_x, start_y = find_player(field, HERO_SIGN)
+                                set_sprites_pos(field, start_x, start_y)
+                                for i in field:
+                                    print(*i)
 
                                 # Распределение тайлов по группам
                                 for y, row_ in enumerate(field):
-                                    y = y - start_y + ceil(screen.get_width() / tile_width / 3)
                                     for x, cell in enumerate(row_):
-                                        x = x - start_x + ceil(screen.get_height() / tile_height / 2)
-
-                                        if str(cell) == NONE_SIGN:
-                                            none_sprites.add(cell)
-
-                                        if str(cell) == FLOOR_SIGN:
-                                            floor_sprites.add(cell)
-
-                                        if str(cell) == WALL_SIGN:
-                                            wall_sprites.add(cell)
-
-                                        if str(cell) == STONE_SIGN:
-                                            floor_sprites.add(cell)
-                                            # stone_sprites.add(cell.character)
-
-                                        if str(cell) == RAT_SIGN:
-                                            floor_sprites.add(cell)
-                                            enemy_sprites.add(cell.character)
-
-                                        if str(cell) == HERO_SIGN:
-                                            floor_sprites.add(cell)
-                                            main_hero_sprites.add(cell.character)
-
-                                        if str(cell) == LADDER_SIGN:
-                                            ladder_sprites.add(cell)
+                                        filling_sprite_groups(cell)
 
                                 # Изменение состояния окна
                                 window = 1

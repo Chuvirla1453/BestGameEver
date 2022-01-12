@@ -1,9 +1,9 @@
 import pygame as pg
 
-from Classes.Secondary_functions import load_image
+from classes.Secondary_functions import load_image
 
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')
-tile_size = (tile_width, tile_height) = (64, 64)
+TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)
 
 
 class BaseCharacter(pg.sprite.Sprite):
@@ -19,7 +19,7 @@ class BaseCharacter(pg.sprite.Sprite):
         super().__init__()
 
         self.image = image
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
 
         self.cell = (x, y)
 
@@ -51,7 +51,7 @@ class BaseCharacter(pg.sprite.Sprite):
 
     def set_pos(self, x: int, y: int) -> None:
         """Установить координаты персонажа"""
-        self.rect.x, self.rect.y = x * tile_width, y * tile_height
+        self.rect.x, self.rect.y = x * TILE_WIDTH, y * TILE_HEIGHT
         self.cell = (x, y)
 
 
@@ -69,7 +69,7 @@ class MainCharacter(BaseCharacter):
         self.image = HERO_SPRITE
         super().__init__(x, y, self.image, hp, name)
 
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
 
         self.cell = (x, y)
 
@@ -115,7 +115,7 @@ class BaseEnemy(BaseCharacter):
         super().__init__(x, y, image, hp, name)
 
         self.image = image
-        self.rect = pg.Rect(x * tile_width, y * tile_height, *tile_size)
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
         self.cell = (x, y)
 
         self.game_field = game_field

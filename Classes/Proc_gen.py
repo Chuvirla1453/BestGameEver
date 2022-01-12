@@ -1,9 +1,9 @@
 import random
 import math
 
-from Classes.Cells import *
-from Classes.Characters import BaseEnemy, MainCharacter
-from Classes.Consts import HERO_HP, RAT_HP, RAT_DAMAGE, RAT_ARMOR, RAT_SPRITE, DAGGER, LEATHER, ENEMIES
+from classes.Cells import *
+from classes.Characters import BaseEnemy, MainCharacter
+from classes.Consts import HERO_HP, RAT_HP, RAT_DAMAGE, RAT_ARMOR, RAT_SPRITE, DAGGER, LEATHER, ENEMIES
 
 
 def proc_gen(level):
