@@ -4,7 +4,7 @@ from Classes.Characters import Armor, Weapon
 """В этом файле лежат все константы, чтобы потом их можно было удобно менять"""
 
 '''___________HERO_______________'''
-HERO_HP = 6
+HERO_HP = 20
 HERO_SIGN = 'C'
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')  # +Characters
 '''______________________________'''

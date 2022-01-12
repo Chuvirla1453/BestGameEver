@@ -6,14 +6,18 @@ from Classes.Consts import *
 
 
 def calculate_turn(enemy, game_field):
+    if heuristic((enemy.get_cell()[0] + 17, enemy.get_cell()[1] + 14),
+                  (game_field.hero.get_cell()[0] + 17, game_field.hero.get_cell()[1] + 14)) > 10:
+        return
     path = a_star(game_field.my_map, (enemy.get_cell()[0] + 17, enemy.get_cell()[1] + 14),
                   (game_field.hero.get_cell()[0] + 17, game_field.hero.get_cell()[1] + 14))
     print(*path)
-    if len(path) > 30:
-        return
+
     if len(path) == 2:
         enemy.hit(game_field.hero)
         GETTING_HIT_SND.play()
+        return
+    if len(path) < 2:
         return
     if type(game_field.my_map[path[1][0]][path[1][1]].character) == Stone:
         game_field.my_map[path[1][0]][path[1][1]].add_character(None)

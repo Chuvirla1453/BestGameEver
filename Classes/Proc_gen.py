@@ -14,8 +14,6 @@ class Map:
     def __init__(self, level):
         self.enemy_count = 15 * level + random.randint(-1, 3 * level)
         self.room_count = (level * 2) ** 2
-        self.enemy_count = 1
-        self.room_count = 1
         self.width = int(self.room_count ** 0.5 * 10)
         self.height = int(self.room_count ** 0.5 * 10)
         self.my_map = []
