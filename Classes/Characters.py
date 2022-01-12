@@ -1,9 +1,15 @@
 import pygame as pg
 
-from classes.Secondary_functions import load_image
+from Classes.Secondary_functions import load_image, load_music
 
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')
 TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)
+
+"""_________SOME SOUNDS______________"""
+RAT_ATTACK = load_music('Sounds', 'rat_attack.mp3')
+RAT_DIE = load_music('Sounds', 'rat_die.mp3')
+JUMP_SND = load_music('Sounds', 'jump.mp3')
+"""___________________________________"""
 
 
 class BaseCharacter(pg.sprite.Sprite):
@@ -32,8 +38,9 @@ class BaseCharacter(pg.sprite.Sprite):
 
     def move(self, dx: int, dy: int) -> None:
         """Передвинуть персонажа"""
-        self.rect.x += dx
-        self.rect.y += dy
+        self.rect.x += dx * TILE_WIDTH
+        self.rect.y += dy * TILE_HEIGHT
+        self.cell = (self.cell[0] + dx, self.cell[1] + dy)
 
     def get_damage(self, damage: int):
         """Ранение персонажа"""
@@ -52,7 +59,6 @@ class BaseCharacter(pg.sprite.Sprite):
     def set_pos(self, x: int, y: int) -> None:
         """Установить координаты персонажа"""
         self.rect.x, self.rect.y = x * TILE_WIDTH, y * TILE_HEIGHT
-        self.cell = (x, y)
 
 
 class MainCharacter(BaseCharacter):
@@ -123,6 +129,11 @@ class BaseEnemy(BaseCharacter):
         self.chance_of_drop = None
         self.damage = damage
         self.armor = armor
+
+        if name == 'rat':
+            self.death_snd = RAT_DIE
+            self.attack_snd = RAT_ATTACK
+            self.walk_snd = JUMP_SND
 
     def hit(self, target):
         target.get_damage(self.damage - target.armor.armor)

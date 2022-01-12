@@ -1,12 +1,12 @@
-# from classes.AI import *
+from Classes.AI import *
 # from classes.Cells import *
 # from classes.Characters import *
-from classes.Errors import *
-from classes.Game_cycle import *
-from classes.Consts import *
-from classes.Menu_elements import *
-from classes.Proc_gen import proc_gen
-from classes.Secondary_functions import *
+from Classes.Errors import *
+from Classes.Game_cycle import *
+from Classes.Consts import *
+from Classes.Menu_elements import *
+from Classes.Proc_gen import proc_gen
+from Classes.Secondary_functions import *
 
 import pygame as pg
 from math import ceil
@@ -45,7 +45,7 @@ def field_increase(field_: list):
         if field_[i_]:
             for j in range(17):
                 field_[i_].insert(0, Tile(-1, -1, 'none'))
-                field_[i_].insert(-1, Tile(-1, -1, 'none'))
+                field_[i_].append(Tile(-1, -1, 'none'))
         else:
             field_[i_] = [Tile(-1, -1, 'none') for i in range(len(field_[0]))]
 
@@ -138,6 +138,7 @@ if __name__ == '__main__':
     game_title = Text(40, 40, 'The Best Game Ever', 30, (0, 255, 0), (0, 0, 0))
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
     text_sprites = pg.sprite.Group([game_title])
+    turn = -1
 
     field = []
 
@@ -157,11 +158,10 @@ if __name__ == '__main__':
                                 pg.display.set_caption(f'{btn.index + 1}-й уровень')
 
                                 # Создание поля
-                                field = field_increase(proc_gen(btn.index + 1).my_map)
+                                field1 = proc_gen(btn.index + 1)
+                                field = field_increase(field1.my_map)
                                 start_x, start_y = find_player(field, HERO_SIGN)
                                 set_sprites_pos(field, start_x, start_y)
-                                for i in field:
-                                    print(*i)
 
                                 # Распределение тайлов по группам
                                 for y, row_ in enumerate(field):
@@ -177,14 +177,102 @@ if __name__ == '__main__':
             start_btns_sprites.draw(screen)
 
         elif window == 1:
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    terminate()
+            if turn == len(field1.turns):
+                turn = -1
+            if not field1.hero.is_alive():
+                terminate()
+            if turn == -1:
+                delta = ()
+                action = False
+                for i in pg.event.get():  # Проверяем действия игрока
+                    if i.type == pg.QUIT:
+                        terminate()
+                    if i.type == pg.KEYDOWN:
+                        if i.key == pg.K_w or i.type == pg.K_UP:
+                            delta = (0, -1)
+                        if i.key == pg.K_a or i.type == pg.K_LEFT:  # Дельта показывает на то, куда смещаются координаты (x, y)
+                            delta = (-1, 0)
+                        if i.key == pg.K_s or i.type == pg.K_DOWN:
+                            delta = (0, 1)
+                        if i.key == pg.K_d or i.type == pg.K_RIGHT:
+                            delta = (1, 0)
+                        if i.key == pg.K_e:
+                            action = True  # action - если игрок взаиsмодействует с клеткой, на которой стоит
+                if delta:
+                    check_cell = (field1.hero.get_cell()[0] + delta[0] + 17, field1.hero.get_cell()[1] + delta[1] + 14)
+
+                    if field1.my_map[check_cell[1]][check_cell[0]].type == 'floor':
+                        if not field1.my_map[check_cell[1]][check_cell[0]].character:
+                            field1.hero.move(delta[0], delta[1])  #<------ ВОТ ЗДЕСЬ КАМЕРА ДОЛЖНА ОБНОВЛЯТЬСЯ
+                            field1.my_map[field1.hero.get_cell()[1] + 14 - delta[1]][field1.hero.get_cell()[0] + 17 - delta[0]].add_character(None)
+                            field1.my_map[check_cell[1]][check_cell[0]].add_character(
+                                field1.hero)  # Если на полу ничего нет, то он идёт
+                            WALK_SND.play()
+                            print(f"HERO {(field1.hero.get_cell()[0] + 17, field1.hero.get_cell()[1] + 14)}")
+                        elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, Stone):
+                            stone_sprites.remove(field1.my_map[check_cell[1]][check_cell[0]].character)
+                            field1.my_map[check_cell[1]][check_cell[0]].add_character(None)  # Если там камень, то он ломает его
+                            BREAK_STONE_SND.play()
+                        elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, BaseEnemy):
+                            field1.hero.hit(field[check_cell[1]][check_cell[0]].character)  # Если враг, то бьёт его
+                            print(f"HP {field[check_cell[1]][check_cell[0]].character.hp}, {field[check_cell[1]][check_cell[0]].character.is_alive()}")
+                            if not field[check_cell[1]][check_cell[0]].character.is_alive():
+                                field[check_cell[1]][check_cell[0]].character.death_snd.play()
+                                enemy_sprites.remove(field[check_cell[1]][check_cell[0]].character)
+                                field1.turns.remove(field[check_cell[1]][check_cell[0]].character)
+                                field1.my_map[check_cell[1]][check_cell[0]].add_character(None)
+                            else:
+                                HIT_SND.play()
+                    elif field1.my_map[check_cell[1]][check_cell[0]].type == 'ladder':
+                        new_level()  # Если лестница, то идёт на следующий уровень
+                        LADDER_SND.play()
+                    else:
+                        WALK_IN_WALL_SND.play()  # Если стена, то пропускает свой ход, с помощью этого тупого действия
+                    turn += 1
+                elif action:
+                    check_cell = field1.hero.get_cell()
+                    if not field1.my_map[check_cell[1]][
+                        check_cell[0]].has_item():  # Если ничего на полу нет, то тоже пропускает ход
+                        WALK_IN_WALL_SND.play()
+                    else:
+                        PICK_SND.play()  # Если что-то есть, то распределяется в инвентарь
+                        if isinstance(field1.my_map[check_cell[1]][check_cell[0]].inventory[-1], Weapon):
+                            field1.hero.change_weapon(field1[check_cell[1]][check_cell[0]].inventory[-1])
+                        elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].inventory[-1], Armor):
+                            field1.hero.change_armor(field1[check_cell[1]][check_cell[0]].inventory[-1])
+                    turn += 1
+            else:
+                enemy = field1.turns[turn]
+                print("Enemy", enemy.get_cell()[0] + 17, enemy.get_cell()[1] + 14)
+                delta = calculate_turn(enemy, field1)
+                if delta:
+                    print("DELTA", delta)
+                    check_cell = (enemy.get_cell()[0] + delta[0] + 17, enemy.get_cell()[1] + delta[1] + 14)
+                    if field1.my_map[check_cell[1]][check_cell[0]].type in ('floor', 'ladder'):
+                        if not field1.my_map[check_cell[1]][check_cell[0]].character:
+                            print('ok')
+                            enemy.move(delta[0], delta[1])
+                            field1.my_map[enemy.get_cell()[1] + 14 - delta[1]][
+                                enemy.get_cell()[0] + 17 - delta[0]].add_character(None)
+                            field1.my_map[check_cell[1]][check_cell[0]].add_character(
+                                enemy)  # Если на полу ничего нет, то он идёт
+                            enemy.walk_snd.play()
+                        elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, Stone):
+                            stone_sprites.remove(field1.my_map[check_cell[1]][check_cell[0]].character)
+                            field1.my_map[check_cell[1]][check_cell[0]].add_character(
+                                None)  # Если там камень, то он ломает его
+                            BREAK_STONE_SND.play()
+                        elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, BaseEnemy):
+                            pass
+                    else:
+                        pass
+                turn += 1
 
             # Отрисовка спрайтов игровго окна
             floor_sprites.draw(screen)
             wall_sprites.draw(screen)
             none_sprites.draw(screen)
+
 
             stone_sprites.draw(screen)
             ladder_sprites.draw(screen)
