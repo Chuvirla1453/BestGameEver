@@ -4,7 +4,7 @@ from Classes.Characters import Armor, Weapon
 """В этом файле лежат все константы, чтобы потом их можно было удобно менять"""
 
 '''___________HERO_______________'''
-HERO_HP = 20
+HERO_HP = 100
 HERO_SIGN = 'C'
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')  # +Characters
 '''______________________________'''
@@ -54,10 +54,17 @@ ENEMIES = ['rat']
 
 
 '''_____ELEMENTS_SIZE_____________'''
+BASE_FONT = 'Times New Roman'
+BASE_FONT_SIZE = 30
+
 START_WIN_SIZE = (start_win_width, start_win_height) = (600, 400)
 
+START_WIN_BTN_SIZE = (START_WIN_BTN_WIDTH, START_WIN_BTN_HEIGHT) = (140, 70)
+START_WIN_BTN_COLOR = (0, 255, 0)
+START_WIN_BTN_BACK_COLOR = (0, 0, 0)
+
 START_WIN_SIZE_SIZE = (start_win_btn_width, start_win_btn_height) = (140, 70)
-START_WIN_SIZE_COUNT = 3
+START_WIN_BTN_COUNT = 3
 
 TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)  # +Characters, Secondary_functions
 '''______________________________'''

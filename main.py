@@ -1,4 +1,5 @@
 from Classes.AI import *
+from Classes.Camera import *
 # from classes.Cells import *
 # from classes.Characters import *
 from Classes.Errors import *
@@ -133,7 +134,7 @@ if __name__ == '__main__':
     pg.display.set_caption('Стартовое окно')
 
     start_btns_sprites = set_start_win_btns(300, start_win_width, start_win_btn_width, start_win_btn_height,
-                                            START_WIN_SIZE_COUNT, (0, 255, 0), (0, 0, 0))
+                                            START_WIN_BTN_COUNT, (0, 255, 0), (0, 0, 0))
 
     game_title = Text(40, 40, 'The Best Game Ever', 30, (0, 255, 0), (0, 0, 0))
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
@@ -179,7 +180,7 @@ if __name__ == '__main__':
         elif window == 1:
             if turn == len(field1.turns):
                 turn = -1
-            if not field1.hero.is_alive():
+            if not field1.hero.is_alive():  # Надо сделать переход в главное меню
                 terminate()
             if turn == -1:
                 delta = ()
@@ -204,6 +205,13 @@ if __name__ == '__main__':
                     if field1.my_map[check_cell[1]][check_cell[0]].type == 'floor':
                         if not field1.my_map[check_cell[1]][check_cell[0]].character:
                             field1.hero.move(delta[0], delta[1])  #<------ ВОТ ЗДЕСЬ КАМЕРА ДОЛЖНА ОБНОВЛЯТЬСЯ
+                            for y in range(len(field)):
+                                for x in range(len(field[y])):
+                                    field[y][x].move(*delta)
+                                    if field[y][x].character is not None and not isinstance(field[y][x].character, MainCharacter):
+                                        # field[y][x].character.move(*delta)
+                                        field[y][x].character.move_tile(*delta)
+
                             field1.my_map[field1.hero.get_cell()[1] + 14 - delta[1]][field1.hero.get_cell()[0] + 17 - delta[0]].add_character(None)
                             field1.my_map[check_cell[1]][check_cell[0]].add_character(
                                 field1.hero)  # Если на полу ничего нет, то он идёт
@@ -273,12 +281,14 @@ if __name__ == '__main__':
             wall_sprites.draw(screen)
             none_sprites.draw(screen)
 
-
             stone_sprites.draw(screen)
             ladder_sprites.draw(screen)
 
             enemy_sprites.draw(screen)
             main_hero_sprites.draw(screen)
+
+        if window == 2:
+            pass
 
         pg.display.flip()
         screen.fill((0, 0, 0))

@@ -54,6 +54,11 @@ class Tile(pg.sprite.Sprite):
         self.rect = pg.Rect(x_ * TILE_WIDTH, y_ * TILE_HEIGHT, *TILE_SIZE)
         self.cell = (x_, y_)
 
+    def move(self, dx: int, dy: int) -> None:
+        self.rect.x -= dx * TILE_WIDTH
+        self.rect.y -= dy * TILE_HEIGHT
+        self.cell = (self.cell[0] + dx, self.cell[1] + dy)
+
     def __str__(self):
         if self.type == 'wall':  # стенка
             return '#'
@@ -80,6 +85,12 @@ class Stone(pg.sprite.Sprite):
 
         self.image = choice(STONE_SPRITE)
         self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
+        self.cell = (x, y)
 
     def set_pos(self, x: int, y: int):
         self.rect.x, self.rect.y = x * TILE_WIDTH, y * TILE_HEIGHT
+
+    def move_tile(self, dx: int, dy: int) -> None:
+        self.rect.x -= dx * TILE_WIDTH
+        self.rect.y -= dy * TILE_HEIGHT
+        # self.cell = (self.cell[0] + dx, self.cell[1] + dy)
