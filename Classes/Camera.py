@@ -8,8 +8,7 @@ class Camera:
 
     def apply(self, obj, x_fac: int, y_fac: int):
         """Функция сдвигает объектов по координатам."""
-
-        if not (issubclass(type(obj), Sprite) or isinstance(obj, Sprite)):
-            raise TypeError('Объект должен быть унаследован от pygame.sprite.Sprite или являться им.')
         obj.rect.x += x_fac * self.step_x
         obj.rect.y += y_fac * self.step_y
+
+        # obj.rect.x, obj.rect.y = obj.rect.x //

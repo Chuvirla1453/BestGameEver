@@ -1,17 +1,19 @@
+from Classes.Consts import BASE_FONT
+
 import pygame as pg
 
 
 class Button(pg.sprite.Sprite):
     """Класс кнопки, для удобной работы в меню"""
 
-    def __init__(self, ind: int, x: int, y: int, width_: int, height_: int, text: str, text_font: int,
-                 text_color=(255, 255, 255), back_color=(0, 0, 0)):
+    def __init__(self, ind: int, x: int, y: int, width_: int, height_: int, text: str,
+                 text_font: int, text_color=(255, 255, 255), back_color=(0, 0, 0)):
         super().__init__()
         self.index = ind
         self.text_color = text_color
         self.back_color = back_color
 
-        font = pg.font.SysFont('Times New Roman', text_font)
+        font = pg.font.SysFont(BASE_FONT, text_font)
         self.text = font.render(text, True, text_color)
 
         self.image = pg.Surface((width_, height_))
@@ -41,7 +43,7 @@ class Text(pg.sprite.Sprite):
         super().__init__()
         self.text_color, self.back_color = text_color, back_color
 
-        font = pg.font.SysFont('Times New Roman', font_size)
+        font = pg.font.SysFont(BASE_FONT, font_size)
         self.text = font.render(text, True, text_color)
 
         self.image = pg.Surface((self.text.get_width() + 20, self.text.get_height() + 20))

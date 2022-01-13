@@ -1,4 +1,5 @@
 from Classes.AI import *
+from Classes.Camera import *
 # from classes.Cells import *
 # from classes.Characters import *
 from Classes.Errors import *
@@ -21,10 +22,14 @@ ladder_sprites = pg.sprite.Group()
 enemy_sprites = pg.sprite.Group()
 main_hero_sprites = pg.sprite.Group()
 
-sprite_groups = (floor_sprites, wall_sprites, none_sprites, stone_sprites, ladder_sprites, enemy_sprites)
+start_win_btn_sprites = pg.sprite.Group()
+start_win_text_sprites = pg.sprite.Group()
+
+death_win_btn_sprites = pg.sprite.Group()
+death_win_text_sprites = pg.sprite.Group()
 
 
-def clear_all_sprite_groups() -> None:
+def clear_game_sprite_groups() -> None:
     """Очищение всех групп спрайтов"""
     floor_sprites.empty()
     wall_sprites.empty()
@@ -123,21 +128,42 @@ def set_start_win_btns(y_: int, win_width: int, btn_width: int, btn_height: int,
     return btns_sprites_
 
 
+def set_death_win_btns(y_: int, win_width: int, btn_width: int, btn_height: int, btn_count: int,
+                       text_color: (int, int, int), back_color: (int, int, int)) -> pg.sprite.Group:
+    dist_btns = (win_width - btn_width * btn_count) // (btn_count + 1)
+    btns_sprites_ = pg.sprite.Group()
+
+    for x_ in range(btn_count):
+        btns_sprites_.add(
+            Button(x_, x_ * (btn_width + dist_btns) + dist_btns, y_, btn_width, btn_height, 'Вернуться в меню', 30,
+                   text_color, back_color))
+    return btns_sprites_
+
+
 if __name__ == '__main__':
     fps = 60
 
     pg.init()
 
     window = 0
-    screen = pg.display.set_mode(START_WIN_SIZE)
+    screen = pg.display.set_mode(MENU_WIN_SIZE)
     pg.display.set_caption('Стартовое окно')
 
-    start_btns_sprites = set_start_win_btns(300, start_win_width, start_win_btn_width, start_win_btn_height,
-                                            START_WIN_SIZE_COUNT, (0, 255, 0), (0, 0, 0))
+    start_win_btn_sprites = set_start_win_btns(300, MENU_WIN_WIDTH, MENU_WIN_BTN_WIDTH, MENU_WIN_BTN_HEIGHT,
+                                               START_WIN_BTN_COUNT, (0, 255, 0), (0, 0, 0))
 
     game_title = Text(40, 40, 'The Best Game Ever', 30, (0, 255, 0), (0, 0, 0))
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
-    text_sprites = pg.sprite.Group([game_title])
+    start_win_text_sprites = pg.sprite.Group([game_title])
+
+    death_win_btn_sprites = set_death_win_btns(100, MENU_WIN_WIDTH, 400,
+                                               MENU_WIN_BTN_HEIGHT,
+                                               DEATH_MENU_BTN_COUNT, (0, 255, 0), (0, 0, 0))
+
+    game_title = Text(40, 40, 'Вы умерли', 30, (0, 255, 0), (0, 0, 0))
+    game_title.rect.x = align(screen.get_width(), game_title.rect.w)
+    death_win_text_sprites = pg.sprite.Group([game_title])
+
     turn = -1
 
     field = []
@@ -150,9 +176,9 @@ if __name__ == '__main__':
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Обработка нажаяти левой кнопки мыши
-                        for btn in start_btns_sprites:
+                        for btn in start_win_btn_sprites:
                             if btn.crossed(*event.pos):  # Здесь должна происходить загрузка уровня
-                                clear_all_sprite_groups()
+                                clear_game_sprite_groups()
                                 # Изменение размера окна под игру
                                 screen = pg.display.set_mode(flags=pg.FULLSCREEN)
                                 pg.display.set_caption(f'{btn.index + 1}-й уровень')
@@ -173,14 +199,18 @@ if __name__ == '__main__':
                                 break
 
             # Отрисовка спрайтов окна меню
-            text_sprites.draw(screen)
-            start_btns_sprites.draw(screen)
+            start_win_text_sprites.draw(screen)
+            start_win_btn_sprites.draw(screen)
 
         elif window == 1:
             if turn == len(field1.turns):
                 turn = -1
-            if not field1.hero.is_alive():
-                terminate()
+            if not field1.hero.is_alive():  # Надо сделать переход в главное меню
+                clear_game_sprite_groups()
+                screen = pg.display.set_mode(MENU_WIN_SIZE)
+                pg.display.set_caption('Вы умерли')
+
+                window = 2
             if turn == -1:
                 delta = ()
                 action = False
@@ -205,19 +235,30 @@ if __name__ == '__main__':
 
                     if field1.my_map[check_cell[1]][check_cell[0]].type == 'floor':
                         if not field1.my_map[check_cell[1]][check_cell[0]].character:
-                            field1.hero.move(delta[0], delta[1])  #<------ ВОТ ЗДЕСЬ КАМЕРА ДОЛЖНА ОБНОВЛЯТЬСЯ
-                            field1.my_map[field1.hero.get_cell()[1] + 14 - delta[1]][field1.hero.get_cell()[0] + 17 - delta[0]].add_character(None)
+                            field1.hero.move(delta[0], delta[1])  # <------ ВОТ ЗДЕСЬ КАМЕРА ДОЛЖНА ОБНОВЛЯТЬСЯ
+                            for y in range(len(field)):
+                                for x in range(len(field[y])):
+                                    field[y][x].move(*delta)
+                                    if field[y][x].character is not None and not isinstance(field[y][x].character,
+                                                                                            MainCharacter):
+                                        # field[y][x].character.move(*delta)
+                                        field[y][x].character.move_tile(*delta)
+
+                            field1.my_map[field1.hero.get_cell()[1] + 14 - delta[1]][
+                                field1.hero.get_cell()[0] + 17 - delta[0]].add_character(None)
                             field1.my_map[check_cell[1]][check_cell[0]].add_character(
                                 field1.hero)  # Если на полу ничего нет, то он идёт
                             WALK_SND.play()
                             print(f"HERO {(field1.hero.get_cell()[0] + 17, field1.hero.get_cell()[1] + 14)}")
                         elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, Stone):
                             stone_sprites.remove(field1.my_map[check_cell[1]][check_cell[0]].character)
-                            field1.my_map[check_cell[1]][check_cell[0]].add_character(None)  # Если там камень, то он ломает его
+                            field1.my_map[check_cell[1]][check_cell[0]].add_character(
+                                None)  # Если там камень, то он ломает его
                             BREAK_STONE_SND.play()
                         elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, BaseEnemy):
                             field1.hero.hit(field[check_cell[1]][check_cell[0]].character)  # Если враг, то бьёт его
-                            print(f"HP {field[check_cell[1]][check_cell[0]].character.hp}, {field[check_cell[1]][check_cell[0]].character.is_alive()}")
+                            print(
+                                f"HP {field[check_cell[1]][check_cell[0]].character.hp}, {field[check_cell[1]][check_cell[0]].character.is_alive()}")
                             if not field[check_cell[1]][check_cell[0]].character.is_alive():
                                 field[check_cell[1]][check_cell[0]].character.death_snd.play()
                                 enemy_sprites.remove(field[check_cell[1]][check_cell[0]].character)
@@ -286,12 +327,25 @@ if __name__ == '__main__':
             wall_sprites.draw(screen)
             none_sprites.draw(screen)
 
-
             stone_sprites.draw(screen)
             ladder_sprites.draw(screen)
 
             enemy_sprites.draw(screen)
             main_hero_sprites.draw(screen)
+
+        if window == 2:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        for btn in death_win_btn_sprites:
+                            if btn.crossed(*event.pos):
+                                pg.display.set_caption('Стартовое окно')
+                                window = 0
+
+            death_win_text_sprites.draw(screen)
+            death_win_btn_sprites.draw(screen)
 
         pg.display.flip()
         screen.fill((0, 0, 0))

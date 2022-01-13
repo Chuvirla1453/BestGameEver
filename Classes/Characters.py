@@ -42,6 +42,10 @@ class BaseCharacter(pg.sprite.Sprite):
         self.rect.y += dy * TILE_HEIGHT
         self.cell = (self.cell[0] + dx, self.cell[1] + dy)
 
+    def move_tile(self, dx: int, dy: int):
+        self.rect.x -= dx * TILE_WIDTH
+        self.rect.y -= dy * TILE_HEIGHT
+
     def get_damage(self, damage: int):
         """Ранение персонажа"""
         if self.is_alive():
@@ -110,6 +114,9 @@ class MainCharacter(BaseCharacter):
             self.game_field.my_map[self.rect.y][self.rect.x].add_item(self.weapon)
             self.armor = new_armor
             self.inventory[1] = new_armor
+
+    def move(self, dx: int, dy: int) -> None:
+        self.cell = (self.cell[0] + dx, self.cell[1] + dy)
 
 
 class BaseEnemy(BaseCharacter):
