@@ -1,3 +1,5 @@
+from Classes.Consts import BASE_FONT
+
 import pygame as pg
 
 
@@ -11,7 +13,7 @@ class Button(pg.sprite.Sprite):
         self.text_color = text_color
         self.back_color = back_color
 
-        font = pg.font.SysFont('Times New Roman', text_font)
+        font = pg.font.SysFont(BASE_FONT, text_font)
         self.text = font.render(text, True, text_color)
 
         self.image = pg.Surface((width_, height_))
@@ -41,7 +43,7 @@ class Text(pg.sprite.Sprite):
         super().__init__()
         self.text_color, self.back_color = text_color, back_color
 
-        font = pg.font.SysFont('Times New Roman', font_size)
+        font = pg.font.SysFont(BASE_FONT, font_size)
         self.text = font.render(text, True, text_color)
 
         self.image = pg.Surface((self.text.get_width() + 20, self.text.get_height() + 20))

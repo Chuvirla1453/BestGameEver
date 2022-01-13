@@ -57,14 +57,15 @@ ENEMIES = ['rat']
 BASE_FONT = 'Times New Roman'
 BASE_FONT_SIZE = 30
 
-START_WIN_SIZE = (start_win_width, start_win_height) = (600, 400)
+MENU_WIN_SIZE = (MENU_WIN_WIDTH, MENU_WIN_HEIGHT) = (600, 400)
 
-START_WIN_BTN_SIZE = (START_WIN_BTN_WIDTH, START_WIN_BTN_HEIGHT) = (140, 70)
-START_WIN_BTN_COLOR = (0, 255, 0)
-START_WIN_BTN_BACK_COLOR = (0, 0, 0)
+MENU_WIN_BTN_SIZE = (MENU_WIN_BTN_WIDTH, MENU_WIN_BTN_HEIGHT) = (140, 70)
+MENU_WIN_BTN_COLOR = (0, 255, 0)
+MENU_WIN_BTN_BACK_COLOR = (0, 0, 0)
 
-START_WIN_SIZE_SIZE = (start_win_btn_width, start_win_btn_height) = (140, 70)
 START_WIN_BTN_COUNT = 3
+
+DEATH_MENU_BTN_COUNT = 1
 
 TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)  # +Characters, Secondary_functions
 '''______________________________'''
