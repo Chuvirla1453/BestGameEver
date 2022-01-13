@@ -188,16 +188,18 @@ if __name__ == '__main__':
                     if i.type == pg.QUIT:
                         terminate()
                     if i.type == pg.KEYDOWN:
-                        if i.key == pg.K_w or i.type == pg.K_UP:
+                        if i.key == pg.K_w or i.key == pg.K_UP:
                             delta = (0, -1)
-                        if i.key == pg.K_a or i.type == pg.K_LEFT:  # Дельта показывает на то, куда смещаются координаты (x, y)
+                        if i.key == pg.K_a or i.key == pg.K_LEFT:  # Дельта показывает на то, куда смещаются координаты (x, y)
                             delta = (-1, 0)
-                        if i.key == pg.K_s or i.type == pg.K_DOWN:
+                        if i.key == pg.K_s or i.key == pg.K_DOWN:
                             delta = (0, 1)
-                        if i.key == pg.K_d or i.type == pg.K_RIGHT:
+                        if i.key == pg.K_d or i.key == pg.K_RIGHT:
                             delta = (1, 0)
                         if i.key == pg.K_e:
                             action = True  # action - если игрок взаиsмодействует с клеткой, на которой стоит
+                        if i.key == pg.K_RALT:
+                            field1.hero.hp = 100000
                 if delta:
                     check_cell = (field1.hero.get_cell()[0] + delta[0] + 17, field1.hero.get_cell()[1] + delta[1] + 14)
 
@@ -224,8 +226,19 @@ if __name__ == '__main__':
                             else:
                                 HIT_SND.play()
                     elif field1.my_map[check_cell[1]][check_cell[0]].type == 'ladder':
-                        new_level()  # Если лестница, то идёт на следующий уровень
-                        LADDER_SND.play()
+                        if isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, BaseEnemy):
+                            field1.hero.hit(field[check_cell[1]][check_cell[0]].character)  # Если враг, то бьёт его
+                            print(f"HP {field[check_cell[1]][check_cell[0]].character.hp}, {field[check_cell[1]][check_cell[0]].character.is_alive()}")
+                            if not field[check_cell[1]][check_cell[0]].character.is_alive():
+                                field[check_cell[1]][check_cell[0]].character.death_snd.play()
+                                enemy_sprites.remove(field[check_cell[1]][check_cell[0]].character)
+                                field1.turns.remove(field[check_cell[1]][check_cell[0]].character)
+                                field1.my_map[check_cell[1]][check_cell[0]].add_character(None)
+                            else:
+                                HIT_SND.play()
+                        else:
+                            new_level()  # Если лестница, то идёт на следующий уровень
+                            LADDER_SND.play()
                     else:
                         WALK_IN_WALL_SND.play()  # Если стена, то пропускает свой ход, с помощью этого тупого действия
                     turn += 1
