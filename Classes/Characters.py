@@ -9,6 +9,7 @@ TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)
 RAT_ATTACK = load_music('Sounds', 'rat_attack.mp3')
 RAT_DIE = load_music('Sounds', 'rat_die.mp3')
 JUMP_SND = load_music('Sounds', 'jump.mp3')
+RAT_POINTS = 5
 """___________________________________"""
 
 
@@ -41,6 +42,10 @@ class BaseCharacter(pg.sprite.Sprite):
         self.rect.x += dx * TILE_WIDTH
         self.rect.y += dy * TILE_HEIGHT
         self.cell = (self.cell[0] + dx, self.cell[1] + dy)
+
+    def move_tile(self, dx: int, dy: int):
+        self.rect.x -= dx * TILE_WIDTH
+        self.rect.y -= dy * TILE_HEIGHT
 
     def get_damage(self, damage: int):
         """Ранение персонажа"""
@@ -111,6 +116,9 @@ class MainCharacter(BaseCharacter):
             self.armor = new_armor
             self.inventory[1] = new_armor
 
+    def move(self, dx: int, dy: int) -> None:
+        self.cell = (self.cell[0] + dx, self.cell[1] + dy)
+
 
 class BaseEnemy(BaseCharacter):
     """
@@ -134,6 +142,7 @@ class BaseEnemy(BaseCharacter):
             self.death_snd = RAT_DIE
             self.attack_snd = RAT_ATTACK
             self.walk_snd = JUMP_SND
+            self.points = RAT_POINTS
 
     def hit(self, target):
         target.get_damage(self.damage - target.armor.armor)

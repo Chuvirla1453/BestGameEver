@@ -3,7 +3,7 @@ from random import choice
 
 from Classes.Characters import BaseEnemy, MainCharacter
 from Classes.Consts import (LADDER_SPRITE, NONE_SPRITE, FLOOR_SPRITES, STONE_SPRITE,
-                            WALL_SPRITES, TILE_SIZE, TILE_WIDTH, TILE_HEIGHT)
+                            WALL_SPRITES, TILE_SIZE, TILE_WIDTH, TILE_HEIGHT, FULL_HEART, HALF_HEART, EMPTY_HEART)
 
 
 class Tile(pg.sprite.Sprite):
@@ -54,6 +54,11 @@ class Tile(pg.sprite.Sprite):
         self.rect = pg.Rect(x_ * TILE_WIDTH, y_ * TILE_HEIGHT, *TILE_SIZE)
         self.cell = (x_, y_)
 
+    def move(self, dx: int, dy: int) -> None:
+        self.rect.x -= dx * TILE_WIDTH
+        self.rect.y -= dy * TILE_HEIGHT
+        self.cell = (self.cell[0] + dx, self.cell[1] + dy)
+
     def __str__(self):
         if self.type == 'wall':  # стенка
             return '#'
@@ -80,6 +85,35 @@ class Stone(pg.sprite.Sprite):
 
         self.image = choice(STONE_SPRITE)
         self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
+        self.cell = (x, y)
 
     def set_pos(self, x: int, y: int):
         self.rect.x, self.rect.y = x * TILE_WIDTH, y * TILE_HEIGHT
+
+    def move_tile(self, dx: int, dy: int) -> None:
+        self.rect.x -= dx * TILE_WIDTH
+        self.rect.y -= dy * TILE_HEIGHT
+        # self.cell = (self.cell[0] + dx, self.cell[1] + dy)
+
+
+class Heart(pg.sprite.Sprite):
+    def __init__(self, x: int, y: int):
+        super().__init__()
+
+        self.image = FULL_HEART
+        self.rect = pg.Rect(x * TILE_WIDTH, y * TILE_HEIGHT, *TILE_SIZE)
+        self.cell = (x, y)
+        self.state = 2
+
+    def set_state(self, st):
+        self.state = st
+        if self.state == 2:
+            self.image = FULL_HEART
+        elif self.state == 1:
+            self.image = HALF_HEART
+        else:
+            self.image = EMPTY_HEART
+
+    def __str__(self):
+        return 'heart'
+
