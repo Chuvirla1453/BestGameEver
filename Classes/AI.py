@@ -11,12 +11,12 @@ def calculate_turn(enemy, game_field):
         return
     path = a_star(game_field.my_map, (enemy.get_cell()[0] + 17, enemy.get_cell()[1] + 14),
                   (game_field.hero.get_cell()[0] + 17, game_field.hero.get_cell()[1] + 14))
-    print(*path)
+
 
     if len(path) == 2:
         enemy.hit(game_field.hero)
         GETTING_HIT_SND.play()
-        return
+        return 'upd'
     if len(path) < 2:
         return
     if type(game_field.my_map[path[1][0]][path[1][1]].character) == Stone:
@@ -28,8 +28,7 @@ def calculate_turn(enemy, game_field):
 
 
 def a_star(field, start, goal):
-    print("Goal", goal[0], goal[1])
-    print("Start", start[0], start[1])
+
     my_field = [[0] * len(field[0]) for _ in range(len(field))]
     for i in range(len(field)):
         for j in range(len(field[i])):
@@ -37,15 +36,13 @@ def a_star(field, start, goal):
                 my_field[i][j] = 999
             elif field[i][j].type in ('ladder', 'floor'):
                 if type(field[i][j].character) == BaseEnemy:
-                    my_field[i][j] = 999
+                    my_field[i][j] = 998
                 elif type(field[i][j].character) == Stone:
                     my_field[i][j] = 2
                 elif type(field[i][j].character) == MainCharacter:
                     continue
                 else:
                     my_field[i][j] = 1
-    for i in my_field:
-        print(*i)
 
     rows = len(my_field)
     cols = len(my_field[0])

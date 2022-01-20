@@ -9,6 +9,7 @@ TILE_SIZE = (TILE_WIDTH, TILE_HEIGHT) = (64, 64)
 RAT_ATTACK = load_music('Sounds', 'rat_attack.mp3')
 RAT_DIE = load_music('Sounds', 'rat_die.mp3')
 JUMP_SND = load_music('Sounds', 'jump.mp3')
+RAT_POINTS = 5
 """___________________________________"""
 
 
@@ -141,6 +142,7 @@ class BaseEnemy(BaseCharacter):
             self.death_snd = RAT_DIE
             self.attack_snd = RAT_ATTACK
             self.walk_snd = JUMP_SND
+            self.points = RAT_POINTS
 
     def hit(self, target):
         target.get_damage(self.damage - target.armor.armor)

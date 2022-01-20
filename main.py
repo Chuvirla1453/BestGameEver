@@ -11,6 +11,7 @@ from Classes.Secondary_functions import *
 
 import pygame as pg
 from math import ceil
+import random
 
 floor_sprites = pg.sprite.Group()
 wall_sprites = pg.sprite.Group()
@@ -28,6 +29,8 @@ start_win_text_sprites = pg.sprite.Group()
 death_win_btn_sprites = pg.sprite.Group()
 death_win_text_sprites = pg.sprite.Group()
 
+heart_sprites = pg.sprite.Group()
+
 
 def clear_game_sprite_groups() -> None:
     """Очищение всех групп спрайтов"""
@@ -40,6 +43,8 @@ def clear_game_sprite_groups() -> None:
 
     enemy_sprites.empty()
     main_hero_sprites.empty()
+
+    heart_sprites.empty()
 
 
 def field_increase(field_: list):
@@ -61,25 +66,27 @@ def field_increase(field_: list):
     return field_
 
 
-def filling_sprite_groups(cell_):
+def filling_sprite_groups(cell):
     """Распределение тайла в группу спрайтов"""
-    if str(cell_) == NONE_SIGN:  # Пустота
+    if str(cell) == NONE_SIGN:  # Пустота
         none_sprites.add(cell)
-    if str(cell_) == FLOOR_SIGN:  # Пол
+    if str(cell) == FLOOR_SIGN:  # Пол
         floor_sprites.add(cell)
-    if str(cell_) == WALL_SIGN:  # Стена
+    if str(cell) == WALL_SIGN:  # Стена
         wall_sprites.add(cell)
-    if str(cell_) == STONE_SIGN:  # Камень
+    if str(cell) == STONE_SIGN:  # Камень
         floor_sprites.add(cell)
         stone_sprites.add(cell.character)
-    if str(cell_) == RAT_SIGN:  # Крыса
+    if str(cell) == RAT_SIGN:  # Крыса
         floor_sprites.add(cell)
         enemy_sprites.add(cell.character)
-    if str(cell_) == HERO_SIGN:  # Главный герой
+    if str(cell) == HERO_SIGN:  # Главный герой
         floor_sprites.add(cell)
         main_hero_sprites.add(cell.character)
-    if str(cell_) == LADDER_SIGN:  # Лесница
+    if str(cell) == LADDER_SIGN:  # Лесница
         ladder_sprites.add(cell)
+    if str(cell) == 'heart':
+        heart_sprites.add(cell)
 
 
 def find_player(field_: list, player_sign_: str) -> (int, int):
@@ -123,7 +130,7 @@ def set_start_win_btns(y_: int, win_width: int, btn_width: int, btn_height: int,
 
     for x_ in range(btn_count):
         btns_sprites_.add(
-            Button(x_, x_ * (btn_width + dist_btns) + dist_btns, y_, btn_width, btn_height, f'{x_ + 1} уровень', 30,
+            Button(x_, x_ * (btn_width + dist_btns) + dist_btns, y_, btn_width, btn_height, f'Начать игру', 30,
                    text_color, back_color))
     return btns_sprites_
 
@@ -138,6 +145,46 @@ def set_death_win_btns(y_: int, win_width: int, btn_width: int, btn_height: int,
             Button(x_, x_ * (btn_width + dist_btns) + dist_btns, y_, btn_width, btn_height, 'Вернуться в меню', 30,
                    text_color, back_color))
     return btns_sprites_
+
+
+def make_field(lvl):
+    global screen, field1, field, start_x, start_y, window, points
+    clear_game_sprite_groups()
+    # Изменение размера окна под игру
+    screen = pg.display.set_mode(flags=pg.FULLSCREEN)
+    pg.display.set_caption(f'{lvl}-й уровень')
+
+    # Создание поля
+    field1 = proc_gen(lvl)
+    field = field_increase(field1.my_map)
+    start_x, start_y = find_player(field, HERO_SIGN)
+    set_sprites_pos(field, start_x, start_y)
+
+    # Распределение тайлов по группам
+    for y, row_ in enumerate(field):
+        for x, cell in enumerate(row_):
+            filling_sprite_groups(cell)
+
+    for i in range(HERO_HP//4):
+        heart_sprites.add(Heart(i, 0))
+
+    # Изменение состояния окна
+    window = 1
+
+
+def heart_update(hp):
+    cnt = 1
+    for i in heart_sprites:
+        if cnt * 4 <= hp:
+            if i.state != 2:
+                i.set_state(2)
+        elif cnt * 4 - 2 <= hp:
+            if i.state != 1:
+                i.set_state(1)
+        else:
+            if i.state != 0:
+                i.set_state(0)
+        cnt += 1
 
 
 if __name__ == '__main__':
@@ -156,18 +203,15 @@ if __name__ == '__main__':
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
     start_win_text_sprites = pg.sprite.Group([game_title])
 
-    death_win_btn_sprites = set_death_win_btns(100, MENU_WIN_WIDTH, 400,
+    death_win_btn_sprites = set_death_win_btns(200, MENU_WIN_WIDTH, 400,
                                                MENU_WIN_BTN_HEIGHT,
                                                DEATH_MENU_BTN_COUNT, (0, 255, 0), (0, 0, 0))
 
-    game_title = Text(40, 40, 'Вы умерли', 30, (0, 255, 0), (0, 0, 0))
     game_title.rect.x = align(screen.get_width(), game_title.rect.w)
-    death_win_text_sprites = pg.sprite.Group([game_title])
-
+    death_win_text_sprites = pg.sprite.Group(Text(200, 40, 'Вы умерли', 30, (0, 255, 0), (0, 0, 0)))
     turn = -1
 
     field = []
-
     while True:
         if window == 0:
             for event in pg.event.get():
@@ -178,24 +222,9 @@ if __name__ == '__main__':
                     if event.button == 1:  # Обработка нажаяти левой кнопки мыши
                         for btn in start_win_btn_sprites:
                             if btn.crossed(*event.pos):  # Здесь должна происходить загрузка уровня
-                                clear_game_sprite_groups()
-                                # Изменение размера окна под игру
-                                screen = pg.display.set_mode(flags=pg.FULLSCREEN)
-                                pg.display.set_caption(f'{btn.index + 1}-й уровень')
-
-                                # Создание поля
-                                field1 = proc_gen(btn.index + 1)
-                                field = field_increase(field1.my_map)
-                                start_x, start_y = find_player(field, HERO_SIGN)
-                                set_sprites_pos(field, start_x, start_y)
-
-                                # Распределение тайлов по группам
-                                for y, row_ in enumerate(field):
-                                    for x, cell in enumerate(row_):
-                                        filling_sprite_groups(cell)
-
-                                # Изменение состояния окна
-                                window = 1
+                                lvl = 1
+                                points = 0
+                                make_field(lvl)
                                 break
 
             # Отрисовка спрайтов окна меню
@@ -239,8 +268,8 @@ if __name__ == '__main__':
                             for y in range(len(field)):
                                 for x in range(len(field[y])):
                                     field[y][x].move(*delta)
-                                    if field[y][x].character is not None and not isinstance(field[y][x].character,
-                                                                                            MainCharacter):
+                                    if field[y][x].character and not isinstance(field[y][x].character, MainCharacter)\
+                                            or isinstance(field[y][x].character, Stone):
                                         # field[y][x].character.move(*delta)
                                         field[y][x].character.move_tile(*delta)
 
@@ -249,27 +278,29 @@ if __name__ == '__main__':
                             field1.my_map[check_cell[1]][check_cell[0]].add_character(
                                 field1.hero)  # Если на полу ничего нет, то он идёт
                             WALK_SND.play()
-                            print(f"HERO {(field1.hero.get_cell()[0] + 17, field1.hero.get_cell()[1] + 14)}")
                         elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, Stone):
                             stone_sprites.remove(field1.my_map[check_cell[1]][check_cell[0]].character)
                             field1.my_map[check_cell[1]][check_cell[0]].add_character(
                                 None)  # Если там камень, то он ломает его
+                            field1.hero.hp += random.randint(0, 1)
+                            if not random.randint(0, 5):
+                                points += 1
                             BREAK_STONE_SND.play()
                         elif isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, BaseEnemy):
                             field1.hero.hit(field[check_cell[1]][check_cell[0]].character)  # Если враг, то бьёт его
-                            print(
-                                f"HP {field[check_cell[1]][check_cell[0]].character.hp}, {field[check_cell[1]][check_cell[0]].character.is_alive()}")
                             if not field[check_cell[1]][check_cell[0]].character.is_alive():
                                 field[check_cell[1]][check_cell[0]].character.death_snd.play()
+                                points += field[check_cell[1]][check_cell[0]].character.points
                                 enemy_sprites.remove(field[check_cell[1]][check_cell[0]].character)
                                 field1.turns.remove(field[check_cell[1]][check_cell[0]].character)
                                 field1.my_map[check_cell[1]][check_cell[0]].add_character(None)
+                                field1.hero.hp += random.randint(1, 4)
                             else:
                                 HIT_SND.play()
                     elif field1.my_map[check_cell[1]][check_cell[0]].type == 'ladder':
                         if isinstance(field1.my_map[check_cell[1]][check_cell[0]].character, BaseEnemy):
                             field1.hero.hit(field[check_cell[1]][check_cell[0]].character)  # Если враг, то бьёт его
-                            print(f"HP {field[check_cell[1]][check_cell[0]].character.hp}, {field[check_cell[1]][check_cell[0]].character.is_alive()}")
+
                             if not field[check_cell[1]][check_cell[0]].character.is_alive():
                                 field[check_cell[1]][check_cell[0]].character.death_snd.play()
                                 enemy_sprites.remove(field[check_cell[1]][check_cell[0]].character)
@@ -278,7 +309,9 @@ if __name__ == '__main__':
                             else:
                                 HIT_SND.play()
                         else:
-                            new_level()  # Если лестница, то идёт на следующий уровень
+                            points += lvl * 10
+                            lvl += 1
+                            make_field(lvl)  # Если лестница, то идёт на следующий уровень
                             LADDER_SND.play()
                     else:
                         WALK_IN_WALL_SND.play()  # Если стена, то пропускает свой ход, с помощью этого тупого действия
@@ -297,14 +330,16 @@ if __name__ == '__main__':
                     turn += 1
             else:
                 enemy = field1.turns[turn]
-                print("Enemy", enemy.get_cell()[0] + 17, enemy.get_cell()[1] + 14)
+
                 delta = calculate_turn(enemy, field1)
-                if delta:
-                    print("DELTA", delta)
+                if delta == 'upd':
+                    heart_update(field1.hero.hp)
+                elif delta:
+
                     check_cell = (enemy.get_cell()[0] + delta[0] + 17, enemy.get_cell()[1] + delta[1] + 14)
                     if field1.my_map[check_cell[1]][check_cell[0]].type in ('floor', 'ladder'):
                         if not field1.my_map[check_cell[1]][check_cell[0]].character:
-                            print('ok')
+
                             enemy.move(delta[0], delta[1])
                             field1.my_map[enemy.get_cell()[1] + 14 - delta[1]][
                                 enemy.get_cell()[0] + 17 - delta[0]].add_character(None)
@@ -333,7 +368,22 @@ if __name__ == '__main__':
             enemy_sprites.draw(screen)
             main_hero_sprites.draw(screen)
 
+            heart_sprites.draw(screen)
+
         if window == 2:
+            f = open('record.txt')
+            try:
+                record = int(f.read())
+            except:
+                record = -1
+            f.close()
+            if record < points:
+                WIN_SND.play()
+                f = open('record.txt', 'w')
+                f.write(str(points))
+                f.close()
+                record = points
+            death_win_text_sprites.add(Text(40, 130, f'Ваш счёт: {points}, рекорд: {record}', 30, (0, 255, 0), (0, 0, 0)))
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     terminate()
@@ -341,6 +391,8 @@ if __name__ == '__main__':
                     if event.button == 1:
                         for btn in death_win_btn_sprites:
                             if btn.crossed(*event.pos):
+                                death_win_text_sprites = pg.sprite.Group(
+                                    Text(200, 40, 'Вы умерли', 30, (0, 255, 0), (0, 0, 0)))
                                 pg.display.set_caption('Стартовое окно')
                                 window = 0
 

@@ -4,7 +4,7 @@ from Classes.Characters import Armor, Weapon
 """В этом файле лежат все константы, чтобы потом их можно было удобно менять"""
 
 '''___________HERO_______________'''
-HERO_HP = 100
+HERO_HP = 20
 HERO_SIGN = 'C'
 HERO_SPRITE = load_image('Sprites', 'Animations', 'Hero', 'hero.png')  # +Characters
 '''______________________________'''
@@ -50,6 +50,9 @@ LADDER_SPRITE = load_image('Sprites', 'Ladder', '1.png')
 
 '''________OTHER__________________'''
 ENEMIES = ['rat']
+FULL_HEART = load_image('Sprites', 'Heart', 'full.png')
+HALF_HEART = load_image('Sprites', 'Heart', 'half.png')
+EMPTY_HEART = load_image('Sprites', 'Heart', 'none.png')
 '''______________________________'''
 
 
@@ -59,11 +62,11 @@ BASE_FONT_SIZE = 30
 
 MENU_WIN_SIZE = (MENU_WIN_WIDTH, MENU_WIN_HEIGHT) = (600, 400)
 
-MENU_WIN_BTN_SIZE = (MENU_WIN_BTN_WIDTH, MENU_WIN_BTN_HEIGHT) = (140, 70)
+MENU_WIN_BTN_SIZE = (MENU_WIN_BTN_WIDTH, MENU_WIN_BTN_HEIGHT) = (180, 70)
 MENU_WIN_BTN_COLOR = (0, 255, 0)
 MENU_WIN_BTN_BACK_COLOR = (0, 0, 0)
 
-START_WIN_BTN_COUNT = 3
+START_WIN_BTN_COUNT = 1
 
 DEATH_MENU_BTN_COUNT = 1
 
@@ -78,6 +81,7 @@ HIT_SND = load_music('Sounds', 'hit.mp3')
 WALK_IN_WALL_SND = load_music('Sounds', 'walk_in_wall.mp3')
 LADDER_SND = load_music('Sounds', 'ladder.mp3')
 PICK_SND = load_music('Sounds', 'pick.mp3')
+WIN_SND = load_music('Sounds', 'win.mp3')
 GAZ = load_music('Sounds', 'Gaz.mp3')  # И ещё раз спасибо
-# GAZ.play(-1)
+GAZ.play(-1)
 '''______________________________'''
